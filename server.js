@@ -201,6 +201,27 @@ app.post('/add-product', checkAuth, upload.single('imageUrl'), async (req, res) 
   }
 });
 
+app.delete('/delete-category/:id', checkAuth, async (req, res) => {
+  const categoryId = req.params.id;
+  try {
+      const category = await Category.findById(categoryId);
+      if (!category) {
+          return res.status(404).json({ success: false, message: 'Category not found' });
+      }
+
+      await Product.updateMany({ category: category.name }, { $unset: { category: 1 } });
+      await Category.findByIdAndDelete(categoryId);
+
+      const updatedCategories = await Category.find();
+      res.json({ success: true, categories: updatedCategories });
+  } catch (error) {
+      console.error('Error deleting category:', error);
+      res.status(500).json({ success: false, message: 'Error deleting category' });
+  }
+});
+
+
+
 
 
 app.get('/test-add-category', async (req, res) => {
