@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collections</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <div class="collections-container">
+        <% collections.forEach(collection => { %>
+            <div class="collection-box" style="background-color: '<%= collection.backgroundColor %>';">
+                <img src="<%= collection.coverPhoto %>" alt="<%= collection.name %>">
+                <div class="collection-info">
+                    <h2><%= collection.name %></h2>
+                    <p><%= collection.description %></p>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</body>
+</html>

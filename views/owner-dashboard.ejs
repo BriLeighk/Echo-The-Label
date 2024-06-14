@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="nav-links">
+                <a href="#" class="nav-link" data-page="home">Owner Profile</a>
+                <a href="#" class="nav-link" data-page="collections">Manage Collections</a>
+                <a href="#" class="nav-link" data-page="products">Manage Products</a>
+                <a href="#" class="nav-link" data-page="email-management">Email Management</a>
+                <a href="#" class="nav-link" data-page="orders">Orders</a>
+                <a href="#" class="nav-link" data-page="analytics">Analytics</a>
+            </div>
+            <div class="sign-out-container">
+                <a href="#" id="sign-out">Sign Out</a>
+            </div>
+        </div>
+        <div class="content-container">
+            <div class="content">
+                <div id="home" class="content-page active">
+                    <h1>Owner Profile</h1>
+                    <p>Some Owner Profile information here + Brand Information...</p>
+                </div>
+                <div id="collections" class="content-page">
+                    <h1>Manage Collections</h1>
+                    <form id="add-collection-form" method="POST" action="/add-collection" enctype="multipart/form-data">
+                        <label for="name">Collection Name</label>
+                        <input type="text" id="name" name="name" required>
+                        <label for="description">Description</label>
+                        <input type="text" id="description" name="description" required>
+                        <label for="coverPhoto">Cover Photo URL</label>
+                        <input type="file" id="coverPhoto" name="coverPhoto" required>
+                        <label for="backgroundColor">Background Color (Hex Code)</label>
+                        <input type="text" id="backgroundColor" name="backgroundColor" required>
+                        <button type="submit">Add Collection</button>
+                    </form>
+                </div>
+
+                <div id="products" class="content-page">
+                    <h1>Manage Products</h1>
+                    <div class="manage-products-container">
+                        <!-- Add Product Section -->
+                        <div class="add-product-section">
+                            <h2 id="add-product-title">Add Product</h2>
+                            <form id="add-product-form" method="POST" action="/add-product" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label for="name">Product Name</label>
+                                    <input type="text" id="name" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <input type="text" id="description" name="description" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="price">Price</label>
+                                    <input type="number" step="0.01" id="price" name="price" required> <!-- step="0.01" allows decimals -->
+                                </div>
+                                <div class="form-group">
+                                    <label for="category">Category</label>
+                                    <div class="custom-dropdown">
+                                        <input type="text" id="category-search" placeholder="Select or add a category">
+                                        <div class="dropdown-list">
+                                            <!-- Categories will be dynamically inserted here -->
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="category" name="category">
+                                </div>
+                                <div class="form-group">
+                                    <label for="inStock">Stock Quantity</label>
+                                    <input type="number" id="inStock" name="inStock" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="collectionName">Collection (Optional)</label>
+                                    <select id="collectionName" name="collectionName"></select> <!-- Still need to add this functionality -->
+                                </div>
+                                <div class="form-group">
+                                    <label for="imageUrl">Image</label>
+                                    <input type="file" id="imageUrl" name="imageUrl" required>
+                                </div>
+                                <button type="submit">Add Product</button>
+                            </form>
+                        </div>
+                        <!-- Product List Section -->
+                        <div class="product-list-section">
+                            <h2 id="product-list-title">Product List</h2>
+                            <div class="product-list">
+                                <!-- Product items will be dynamically inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="email-management" class="content-page">
+                    <h1>Email Management</h1>
+                    <p>Set up email scheduling to mailing list here...</p>
+                </div>
+                <div id="orders" class="content-page">
+                    <h1>Orders</h1>
+                    <p>List of all orders clients have made (with status)...</p>
+                </div>
+                <div id="analytics" class="content-page">
+                    <h1>Analytics</h1>
+                    <p>Total number of sales, total revenue, highest traffic sources, etc...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/manage-products.js"></script>
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/header.js"></script>
+</body>
+</html>

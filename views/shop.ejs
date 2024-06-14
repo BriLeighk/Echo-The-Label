@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <main class="shop-main">
+        <h1 class="shop-title">Echo Shop</h1>
+        <div class="shop-container">
+            <aside class="categories">
+                <ul>
+                    <li><a href="#" class="category-link" data-category="all">All</a></li>
+                    <% categories.forEach(category => { %>
+                    <lil><a href="#" class="category-link" data-category="<%= category.name %>"><%= category.name %></a></lil>
+                  <% }) %>
+                </ul>
+            </aside>
+            <div class="products-container">
+                <div class="products">
+                    <% products.forEach(product => { %>
+                        <div class="product">
+                            <img src="<%= product.imageUrl %>" alt="<%= product.name %>">
+                            <h2><%= product.name %></h2>
+                            <p><%= product.description %></p>
+                            <p>$<%= product.price %></p>
+                            <button class="add-to-cart" data-id="<%= product._id %>">Add to Cart</button>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    
+
+    <script src="/js/shop.js"></script>
+    <script src="/js/header.js"></script>
+</body>
+</html>

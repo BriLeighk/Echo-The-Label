@@ -1,0 +1,130 @@
+<header>
+    <nav>
+        <!-- DESKTOP VIEW -->
+        <div class="menu-bar desktop-view"> 
+            <div class="left-icons desktop-view">
+
+                <a href="/home" class="icon home-icon">
+                    <img src="/images/home-icon.png" alt="Home">
+                </a>
+                <a href="#" class="icon profile-icon">
+                    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script> 
+                    <dotlottie-player src="https://lottie.host/f3b63003-0a61-4c70-ae48-5614762ed75b/y0mXnUkKuh.json" background="transparent" speed="1.5" style="width: 60px; height: 60px;" loop autoplay></dotlottie-player>
+                </a>
+            </div>
+            <div class="menu-buttons">
+                <a href="#" if="about-link">About Us</a>
+                <a href="/shop">Shop Now</a>
+                <a href="#">Gallery</a>
+                <a href="#">Contact Us</a>
+            </div>
+            <div class="right-icons desktop-view">
+                <a href="#" class="icon" id="search-icon">
+                    <img src="/images/search-pink.png" alt="Search">
+                </a>
+                <a href="#" class="icon" id="shopping">
+                    <img src="/images/cart-pink.png" alt="Cart">
+                </a>
+            </div>
+        </div>
+        <!-- MOBILE VIEW -->
+        <div class="menu-bar mobile-view">
+            <div class="left-icons mobile-view">
+                <button id="menu-btn">
+                    <img src="/images/menu-icon-pink.png" alt="Menu">
+                </button> <!-- Menu Button -->
+                <a href="#" class="icon profile-icon">
+                    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script> 
+                    <dotlottie-player src="https://lottie.host/f3b63003-0a61-4c70-ae48-5614762ed75b/y0mXnUkKuh.json" background="transparent" speed="1.5" style="width: 60px; height: 60px;" loop autoplay></dotlottie-player>
+                </a>
+            </div>
+            <div class="menu-buttons mobile-view">
+                <a href="/home" class="icon echo-text">Echo</a>
+            </div>
+            <div class="right-icons mobile-view">
+                <a href="#" class="icon" id="search-icon">
+                    <img src="/images/search-pink.png" alt="Search">
+                </a>
+                <a href="#" class="icon" id="shopping">
+                    <img src="/images/cart-pink.png" alt="Cart">
+                </a>
+            </div>
+        </div>
+        <div id="menu-popup">
+            <a href="#" id="close-btn">&times;</a>
+            <div id="text-large">
+                <a href="#" id="about-link">About Us</a>
+                <a href="/shop">Shop Now</a>
+                <a href="#">Gallery</a>
+            </div>
+            <div id="text-small">
+                <a href="#">Privacy Policy >></a>
+                <a href="#">Terms and Conditions >></a>
+                <a href="#">Contact Us >></a>
+            </div>
+            <div class="social-media-icons popup">
+                <a href="https://instagram.com" target="_blank">
+                    <img src="/images/instagram-logo-beige.png" alt="Instagram">
+                </a>
+                <a href="https://tiktok.com" target="_blank">
+                    <img src="/images/tiktok-logo-beige.png" alt="TikTok">
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login</h2>
+            <div id="loginError" class="error-message"></div> <!-- Error message container -->
+            
+            <form id="loginForm" method="POST" action="/login">
+                <div class="form-group">
+                    <label for="username">Email</label>
+                    <input type="text" id="username" name="username" >
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" >
+                </div>
+
+                <div class="button-group psw">
+                    <button type="button" id="forgotPasswordBtn">Forgot Password</button>
+                </div>
+                <div class="button-group btns">
+                    <button type="submit">Sign In</button>
+                    <button type="button" id="createAccountBtn">Create an Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Account Modal -->
+    <div id="createAccountModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create Account</h2>
+            <div id="createAccountError" class="error-message"></div> <!-- Error message container -->
+            <form id="createAccountForm" method="POST" action="/create-account">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" >
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" >
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" >
+                </div>
+                <div class="button-group">
+                    <button type="submit">Create Account</button>
+                    <button type="button" id="signInBtn">Already have an account? Sign in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="nav-links">
+                <a href="#" class="nav-link" data-page="profile">Profile/My Info</a>
+                <a href="#" class="nav-link" data-page="orders">Orders</a>
+                <a href="#" class="nav-link" data-page="payment-info">Payment Information</a>
+            </div>
+            <div class="sign-out-container">
+                <a href="#" id="sign-out">Sign Out</a>
+            </div>
+        </div>
+        <div class="content">
+            <div id="profile" class="content-page active">
+                <h1>Profile/My Info</h1>
+                <p>Some user information here...</p>
+            </div>
+            <div id="orders" class="content-page">
+                <h1>Orders</h1>
+                <p>List of orders here...</p>
+            </div>
+            <div id="payment-info" class="content-page">
+                <h1>Payment Information</h1>
+                <p>Payment info here...</p>
+            </div>
+        </div>
+    </div>
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/header.js"></script>
+</body>
+</html>
