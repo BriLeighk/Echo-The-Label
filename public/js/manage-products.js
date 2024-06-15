@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const deleteCategoryModal = document.getElementById('delete-category-modal');
     const confirmDeleteBtn = document.getElementById('confirm-delete');
     const cancelDeleteBtn = document.getElementById('cancel-delete');
-    const closeModalBtn = document.querySelector('.modal .close');
+    const closeModalBtns = document.querySelector('.modal .close');
     let categoryToDelete = null;
 
     // Fetch categories
@@ -219,9 +219,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Close modal when the close button or cancel button is clicked
-    closeModalBtn.addEventListener('click', () => {
-        deleteCategoryModal.style.display = 'none';
-        categoryToDelete = null;
+    closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            deleteCategoryModal.style.display = 'none';
+            productModal.style.display = 'none';
+            categoryToDelete = null;
+        });
     });
 
     cancelDeleteBtn.addEventListener('click', () => {

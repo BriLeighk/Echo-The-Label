@@ -15,18 +15,18 @@
                 <ul>
                     <li><a href="#" class="category-link" data-category="all">All</a></li>
                     <% categories.forEach(category => { %>
-                    <lil><a href="#" class="category-link" data-category="<%= category.name %>"><%= category.name %></a></lil>
-                  <% }) %>
+                    <li><a href="#" class="category-link" data-category="<%= category.name %>"><%= category.name %></a></li>
+                    <% }) %>
                 </ul>
             </aside>
             <div class="products-container">
                 <div class="products">
                     <% products.forEach(product => { %>
-                        <div class="product">
+                        <div class="product" data-id="<%= product._id %>">
                             <img src="<%= product.imageUrl %>" alt="<%= product.name %>">
                             <h2><%= product.name %></h2>
-                            <p><%= product.description %></p>
-                            <p>$<%= product.price %></p>
+                            <p class="price">$<%= product.price %></h1>
+                            <p class="description"><%= product.description %></p>
                             <button class="add-to-cart" data-id="<%= product._id %>">Add to Cart</button>
                         </div>
                     <% }) %>
@@ -34,6 +34,20 @@
             </div>
         </div>
     </main>
+
+    <!-- Modal -->
+    <div id="productModal" class="product-modal">
+        <div class="product-modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="Product Image" style="width: 40%; float: left; margin-right: 20px;">
+                <h2 id="modalTitle"></h2>
+                <p id="modalPrice"></p>
+                <p id="modalDescription"></p>
+                <button id="modalAddToCart">Add to Cart</button>
+            </div>
+        </div>
+    </div>
 
 
     

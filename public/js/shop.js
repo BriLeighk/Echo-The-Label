@@ -11,11 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 productDiv.innerHTML = `
                     <img src="${product.imageUrl}" alt="${product.name}">
                     <h2>${product.name}</h2>
-                    <p>${product.description}</p>
-                    <p>$${product.price}</p>
+                    <p class="price">$${product.price}</p>
+                    <p class="description">${product.description}</p>
                     <button class="add-to-cart" data-id="${product._id}">Add to Cart</button>
                 `;
                 productsDiv.appendChild(productDiv);
+
+                productDiv.addEventListener('click', () => openModal(product));
             });
         })
         .catch(error => {
@@ -55,5 +57,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
     });
+
+
+    const productModal = document.getElementById('productModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalPrice = document.getElementById('modalPrice');
+    const modalDescription = document.getElementById('modalDescription');
+    const modalAddToCart = document.getElementById('modalAddToCart');
+    const closeModalBtns = document.querySelectorAll('.modal .close');
+
+    closeModalBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+          productModal.style.display = 'none';
+      });
   });
+
+    function openModal(product) {
+        productModal.style.display = 'block';
+        modalImage.src = product.imageUrl;
+        modalTitle.innerText = product.name;
+        modalPrice.innerText = `$${product.price}`;
+        modalDescription.innerText = product.description;
+        modalAddToCart.dataset.id = product._id;
+    }
+
+    span.onclick = function() {
+        productModal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == productModal) {
+            productModal.style.display = 'none';
+        }
+    }
+});
   
