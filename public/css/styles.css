@@ -747,6 +747,7 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
     }
 
 
+
 /* Style the navigation links and sign-out button ////////////////////////////////////////// */
 .nav-link {
     display: block;
@@ -800,46 +801,64 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
 
 /* Manage Products --- Add Product Category Drop Down /////////////////////////////*/
     .custom-dropdown {
+        width: 258px;
         position: relative;
-        width: 100%;
     }
 
-    .custom-dropdown input {
+    .custom-dropdown input[type="text"] {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 8px;
+        box-sizing: border-box;
     }
 
-    .dropdown-list {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        max-height: 200px;
-        overflow-y: auto;
-        background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+    .custom-dropdown .dropdown-list {
         display: none;
+        position: absolute;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-height: 200px; /* Adjust as needed */
+        overflow-y: auto;
         z-index: 1000;
     }
 
-    .dropdown-list.visible {
+    .custom-dropdown .dropdown-list.visible {
         display: block;
     }
-
-    .dropdown-item {
-        padding: 10px;
+    
+    .custom-dropdown .dropdown-item {
+        padding: 8px;
         cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .custom-dropdown .dropdown-item:hover {
+        background-color: #f0f0f0;
     }
 
-    .dropdown-item:hover {
-        background: #f0f0f0;
+    .custom-dropdown .dropdown-item .delete-category-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #ff0000;
     }
 
-  
-  
+    
+
+/* Manage Products --- Modal for deleting a category ///////////////////////////////////////////////*/
+  #confirm-delete, #cancel-delete {
+    background-color: #d8c1bc;
+    border: none;
+    border-radius: 4px;
+    font-size: clamp(12px, 1.5vw, 15px);
+    cursor: url("../images/cursor.png"), auto;
+    padding: 0.5rem 1rem; /* Adjust padding as needed */
+    margin: 0.5rem;
+  }
+
+
 /* Shop Page --- Categories Container //////////////////////////////////////////////////////////////*/
     .shop-main {
         display: flex;

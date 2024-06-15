@@ -201,24 +201,30 @@ app.post('/add-product', checkAuth, upload.single('imageUrl'), async (req, res) 
   }
 });
 
-app.delete('/delete-category/:id', checkAuth, async (req, res) => {
-  const categoryId = req.params.id;
+app.post('/delete-category', checkAuth, async (req, res) => {
+  const { categoryName } = req.body;
   try {
-      const category = await Category.findById(categoryId);
-      if (!category) {
+      // Find and delete the category
+      const deletedCategory = await Category.findOneAndDelete({ name: categoryName });
+
+      // If the category is not found, return an error
+      if (!deletedCategory) {
           return res.status(404).json({ success: false, message: 'Category not found' });
       }
 
-      await Product.updateMany({ category: category.name }, { $unset: { category: 1 } });
-      await Category.findByIdAndDelete(categoryId);
+      // Remove the category from all products
+      await Product.updateMany({ category: categoryName }, { $unset: { category: '' } });
 
-      const updatedCategories = await Category.find();
-      res.json({ success: true, categories: updatedCategories });
+      // Get updated categories
+      const categories = await Category.find();
+
+      res.json({ success: true, categories });
   } catch (error) {
       console.error('Error deleting category:', error);
       res.status(500).json({ success: false, message: 'Error deleting category' });
   }
 });
+
 
 
 
