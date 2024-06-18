@@ -17,30 +17,10 @@ document.addEventListener('DOMContentLoaded', function() {
         aboutSection.classList.add('show');
         footer.classList.add('show');
     }
-
-    // Function to load home page content
-    function loadHomePage() {
-        fetch('/home-content')
-            .then(response => response.text())
-            .then(data => {
-                const mainContent = document.createElement('div');
-                mainContent.innerHTML = data;
-                document.body.innerHTML = '';
-                document.body.appendChild(header);
-                document.body.appendChild(mainContent);
-                const scriptTags = mainContent.querySelectorAll("script");
-                scriptTags.forEach(tag => {
-                    if (tag.src) {
-                        const script = document.createElement("script");
-                        script.src = tag.src;
-                        document.body.appendChild(script);
-                    }
-                });
-            });
-    }
+    
 
     // Section One
-    startButton.addEventListener("click", function(e) {
+    startButton?.addEventListener("click", function(e) {
         e.preventDefault();
         hero.classList.add("shrink");
         heroContent.classList.add("shrink");
@@ -55,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handles button functionalities (home button)
-    document.querySelector('.home-button').addEventListener('click', function(e) {
+    document.querySelector('.home-button')?.addEventListener('click', function(e) {
         e.preventDefault();
         window.location.href = '/home';
     });
@@ -68,11 +48,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
 
     //Section Two /////////////////////////////////////
-    menuBtn.addEventListener('click', function() {
+    menuBtn?.addEventListener('click', function() {
         menuPopup.style.display = 'block';
     });
 
-    closeBtn.addEventListener('click', function() {
+    closeBtn?.addEventListener('click', function() {
         menuPopup.style.display = 'none';
     });
 
@@ -84,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle scroll to about section
-    document.getElementById('about-link').addEventListener('click', function(e) {
+    document.getElementById('about-link')?.addEventListener('click', function(e) {
         e.preventDefault();
         if (window.location.pathname === '/home') {
             document.getElementById('about').scrollIntoView({ behavior: 'smooth' });

@@ -36,6 +36,8 @@
                         <input type="text" id="name" name="name" required>
                         <label for="description">Description</label>
                         <input type="text" id="description" name="description" required>
+                        <label for="details">Details</label>
+                        <input type="text" id="details" name="details" required>
                         <label for="coverPhoto">Cover Photo URL</label>
                         <input type="file" id="coverPhoto" name="coverPhoto" required>
                         <label for="backgroundColor">Background Color (Hex Code)</label>
@@ -50,6 +52,8 @@
                         <!-- Add Product Section -->
                         <div class="add-product-section">
                             <h2 id="add-product-title">Add Product</h2>
+                            <!-- Error message container -->
+                             <div id="error-messages" style="color: red;"></div>
                             <form id="add-product-form" method="POST" action="/add-product" enctype="multipart/form-data">
                                 <div class="form-group">
                                     <label for="name">Product Name</label>
@@ -57,7 +61,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <input type="text" id="description" name="description" required>
+                                    <textarea type="text" id="description" name="description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="details">Details</label>
+                                    <textarea type="text" id="details" name="details" required></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="price">Price</label>
@@ -130,6 +138,66 @@
             <button id="cancel-delete">Cancel</button>
         </div>
     </div>
+
+    <!-- Modal for deleting product -->
+    <div id="delete-product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete this product? This will remove the product permanently.</p>
+            <button id="confirm-product-delete">Yes, Delete</button>
+            <button id="cancel-product-delete">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="edit-product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-edit-modal">&times;</span>
+            <h2>Edit Product</h2>
+            <div class="edit-modal-content">
+                <div class="edit-product-button-container">
+                    <div class="edit-product-image-container">
+                        <img id="edit-product-image-preview" src="" alt="Current Product Image">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-image">Image</label>
+                        <input type="file" id="edit-product-image" name="edit-product-image" accept="image/*">
+                    </div>
+                </div>
+                
+                <form id="edit-product-form" method="POST" action="/edit-product" enctype="multipart/form-data">
+                    <input type="hidden" id="edit-product-id" name="edit-product-id">
+                    <div class="form-group">
+                        <label for="edit-product-title">Product Name</label>
+                        <input type="text" id="edit-product-title" name="edit-product-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-description">Description</label>
+                        <textarea id="edit-product-description" name="edit-product-description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-details">Details</label>
+                        <textarea id="edit-product-details" name="edit-product-details" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-price">Price</label>
+                        <input type="number" step="0.01" id="edit-product-price" name="edit-product-price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-stock">Stock Quantity</label>
+                        <input type="number" id="edit-product-stock" name="edit-product-stock" required>
+                    </div>
+                    <button type="submit">Save Changes</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
 
     <script src="/js/manage-products.js"></script>
     <script src="/js/dashboard.js"></script>

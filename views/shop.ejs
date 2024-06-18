@@ -25,8 +25,9 @@
                         <div class="product" data-id="<%= product._id %>">
                             <img src="<%= product.imageUrl %>" alt="<%= product.name %>">
                             <h2><%= product.name %></h2>
-                            <p class="price">$<%= product.price %></h1>
+                            <p class="price">$<%= product.price %></p>
                             <p class="description"><%= product.description %></p>
+                            <p class="details"><%= product.details %></p>
                             <button class="add-to-cart" data-id="<%= product._id %>">Add to Cart</button>
                         </div>
                     <% }) %>
@@ -40,11 +41,21 @@
         <div class="product-modal-content">
             <span class="close">&times;</span>
             <div class="modal-body">
-                <img id="modalImage" src="" alt="Product Image" style="width: 40%; float: left; margin-right: 20px;">
-                <h2 id="modalTitle"></h2>
-                <p id="modalPrice"></p>
-                <p id="modalDescription"></p>
-                <button id="modalAddToCart">Add to Cart</button>
+                <div class="shop-modal-left">
+                    <div class="modalImage-container">
+                        <img id="modalImage" src="" alt="Product Image">
+                    </div>
+                    <p id="modalDetails"></p>
+                </div>
+                <div class="shop-modal-right">
+                    <h2 id="modalTitle"></h2>
+                    <p id="modalPrice"></p>
+                    <p id="modalDescription"></p>
+                    <div class="modal-footer">
+                        <button class="add-to-cart-button" id="modalAddToCart">Add to Cart</button>
+                    </div>
+                    
+                </div>
             </div>
         </div>
     </div>

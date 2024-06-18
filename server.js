@@ -96,6 +96,7 @@ app.get('/api/check-login', (req, res) => {
 
 
 
+
 //login modal functionality ///////////////////////////////////////////////////////////
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -169,7 +170,7 @@ app.post('/add-collection', checkAuth, async (req, res) => {
 
 //Backend Route for adding a product //////////////////////////////////////////////////
 app.post('/add-product', checkAuth, upload.single('imageUrl'), async (req, res) => {
-  const { name, description, price, category, collectionName, inStock } = req.body;
+  const { name, description, details, price, category, collectionName, inStock } = req.body;
   const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
   let finalCategory = category;
 
@@ -189,7 +190,7 @@ app.post('/add-product', checkAuth, upload.single('imageUrl'), async (req, res) 
             console.log(`New category added: ${finalCategory}`);
         } 
     
-    const product = new Product({ name, description, price, category: finalCategory, collectionName, imageUrl, inStock });
+    const product = new Product({ name, description, details, price, category: finalCategory, collectionName, imageUrl, stockQuantity: inStock });
     await product.save();
     const updatedCategories = await Category.find();
 
@@ -224,27 +225,6 @@ app.post('/delete-category', checkAuth, async (req, res) => {
       res.status(500).json({ success: false, message: 'Error deleting category' });
   }
 });
-
-
-
-
-
-
-app.get('/test-add-category', async (req, res) => {
-  try {
-    const newCategory = new Category({ name: 'TestCategory' });
-    await newCategory.save();
-    const categories = await Category.find();
-    res.json({ success: true, categories });
-  } catch (error) {
-    console.error('Error adding test category:', error);
-    res.json({ success: false, message: 'Error adding test category' });
-  }
-});
-
-
-
-
 
 
 app.get('/logout', (req, res) => {
@@ -292,6 +272,7 @@ app.get('/api/products', async (req, res) => {
     } else {
       products = await Product.find();
     }
+    console.log('Fetched products:', products); // Add this line
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching products' });
@@ -355,6 +336,61 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
+
+// Define the route to get a product by ID
+app.get('/api/product/:id', async (req, res) => {
+  const productId = req.params.id;
+  try {
+      const product = await Product.findById(productId);
+      if (!product) {
+          return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+      res.json(product);
+  } catch (err) {
+      res.status(500).json({ success: false, message: 'Error fetching product' });
+  }
+});
+
+app.post('/edit-product/:id', checkAuth, upload.single('edit-product-image'), async (req, res) => {
+  const productId = req.params.id;
+  const { 'edit-product-title': name, 'edit-product-description': description, 'edit-product-details': details, 'edit-product-price': price, 'edit-product-stock': stockQuantity } = req.body;
+  const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
+
+  console.log('Received edit request for product:', productId);
+  console.log('Update data:', { name, description, details, price, stockQuantity, imageUrl });
+  console.log('File received:', req.file);
+
+  try {
+      const updateData = { name, description, details, price, stockQuantity };
+      if (req.file) {
+          updateData.imageUrl = imageUrl;
+
+          const product = await Product.findById(productId);
+            if (product && product.imageUrl) {
+                const oldImagePath = path.join(__dirname, 'public', product.imageUrl);
+                fs.unlink(oldImagePath, (err) => {
+                    if (err) {
+                        console.error('Error deleting old image:', err);
+                    } else {
+                        console.log('Old image deleted:', oldImagePath);
+                    }
+                });
+            }
+      }
+
+      const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, { new: true });
+      console.log('Product updated successfully:', updatedProduct);
+      res.json({ success: true, product: updatedProduct });
+  } catch (error) {
+      console.error('Error updating product:', error);
+      res.json({ success: false, message: 'Error updating product' });
+  }
+});
+
+// Serve favicon.ico file
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
 
 
 

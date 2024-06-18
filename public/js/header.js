@@ -13,14 +13,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = document.getElementById('close-btn');
     const homeIcons = document.querySelectorAll('.home-icon a, .echo-text');
 
+    if (menuBtn) {
+        menuBtn.addEventListener('click', function() {
+            menuPopup.style.display = 'block';
+        });
+    }
+    
 
-    menuBtn.addEventListener('click', function() {
-        menuPopup.style.display = 'block';
-    });
-
-    closeBtn.addEventListener('click', function() {
-        menuPopup.style.display = 'none';
-    });
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            menuPopup.style.display = 'none';
+        });
+    }
+    
 
     // Close the menu popup if the user clicks outside of it
     window.addEventListener('click', function(event) {
@@ -83,21 +88,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    createAccountBtn.addEventListener("click", function() {
-        loginModal.style.display = "none";
-        createAccountModal.style.display = "block";
-        clearModal(loginModal);
-    });
-
-    signInBtn.addEventListener("click", function() {
-        createAccountModal.style.display = "none";
-        loginModal.style.display = "block";
-        clearModal(createAccountModal);
-    });
-
+    if (createAccountBtn) {
+        createAccountBtn.addEventListener("click", function() {
+            loginModal.style.display = "none";
+            createAccountModal.style.display = "block";
+            clearModal(loginModal);
+        });
+    }
+    
+    if (signInBtn) {
+        signInBtn.addEventListener("click", function() {
+            createAccountModal.style.display = "none";
+            loginModal.style.display = "block";
+            clearModal(createAccountModal);
+        });
+    }
     
 
-    window.addEventListener("click", function(event) {
+    window.addEventListener("click", function (event) {
         if (event.target == loginModal) {
             loginModal.style.display = "none";
             clearModal(loginModal);
@@ -112,60 +120,70 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById("loginForm");
     const loginError = document.getElementById("loginError");
 
-    loginForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        loginError.textContent = ''; //Clear previous error message
-
-        const formData = new FormData(loginForm);
-
-
-        fetch('/login', {
-            method: 'POST',
-            body: JSON.stringify(Object.fromEntries(formData)),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = data.redirectUrl;
-            } else {
-                loginError.textContent = data.message; // Display new error message
-            }
+    if (loginForm) {
+        loginForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            if (loginError) loginError.textContent = ''; //Clear previous error message
+    
+            const formData = new FormData(loginForm);
+    
+    
+            fetch('/login', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    loginError.textContent = data.message; // Display new error message
+                }
+            })
+            .catch(error => {
+                console.error('Error during login:', error);
+                loginError.textContent = 'An error occurred during login. Please try again.';
+            });
         });
-    });
+    }
+    
 
 
     // Handle create account form submission
     const createAccountForm = document.getElementById("createAccountForm");
     const createAccountError = document.getElementById("createAccountError");
 
-    createAccountForm.addEventListener("submit", function(e) {
-        e.preventDefault();
-        createAccountError.textContent = ''; // Clear previous error message
-
-        const formData = new FormData(createAccountForm);
-        
-        fetch('/create-account', {
-            method: 'POST',
-            body: JSON.stringify(Object.fromEntries(formData)),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById("createAccountModal").style.display = 'none';
-                loginModal.style.display = 'block';
-                createAccountForm.reset();
-                createAccountError.textContent = '';
-            } else {
-                createAccountError.textContent = data.message; // Display new error message
-            }
+    if (createAccountForm) {
+        createAccountForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            if (createAccountError) createAccountError.textContent = ''; // Clear previous error message
+    
+            const formData = new FormData(createAccountForm);
+            
+            fetch('/create-account', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (createAccountModal) createAccountModal.style.display = 'none';
+                        if (loginModal) loginModal.style.display = 'block';
+                        createAccountForm.reset();
+                        if (createAccountError) createAccountError.textContent = '';
+                    } else {
+                        if (createAccountError) createAccountError.textContent = data.message; // Display new error message
+                    }
+                });
         });
-    });
+    }
+    
 
     window.addEventListener('click', function(event) {
         if (event.target == document.getElementById('loginModal')) {
@@ -191,8 +209,11 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/partials/header')
         .then(response => response.text())
         .then(data => {
-            document.getElementById('header-container').innerHTML = data;
+            const headerContainer = document.getElementById('header-container');
+            if (headerContainer) {
+                headerContainer.innerHTML = data;
+                console.log('Header loaded successfully');
+            }
         })
         .catch(error => console.error('Error loading header:', error));
-        
 });

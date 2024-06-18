@@ -1,13 +1,17 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    price: { type: Number, required: true },
-    category: { type: String, required: true },
-    collectionName: { type: String },
-    imageUrl: { type: String, required: true },
-    inStock: { type: Number, required: true }
+    name: String,
+    description: String,
+    price: Number,
+    category: String,
+    collectionName: String,
+    imageUrl: String,
+    stockQuantity: Number, // Ensure this field is present
+    details: String,
+    //More Images
+    //Sizing
+    //Size Chart (drop down menu with + to add more?)
 });
 
 const Product = mongoose.model('Product', productSchema);

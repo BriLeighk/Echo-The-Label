@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h2>${product.name}</h2>
                     <p class="price">$${product.price}</p>
                     <p class="description">${product.description}</p>
+                    <p class="details">${product.details}</p>
                     <button class="add-to-cart" data-id="${product._id}">Add to Cart</button>
                 `;
                 productsDiv.appendChild(productDiv);
@@ -64,14 +65,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalTitle = document.getElementById('modalTitle');
     const modalPrice = document.getElementById('modalPrice');
     const modalDescription = document.getElementById('modalDescription');
+    const modalDetails = document.getElementById('modalDetails');
     const modalAddToCart = document.getElementById('modalAddToCart');
-    const closeModalBtns = document.querySelectorAll('.modal .close');
-
-    closeModalBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-          productModal.style.display = 'none';
-      });
-  });
+    const closeButton = document.querySelector('.product-modal .close');
 
     function openModal(product) {
         productModal.style.display = 'block';
@@ -79,17 +75,22 @@ document.addEventListener('DOMContentLoaded', function() {
         modalTitle.innerText = product.name;
         modalPrice.innerText = `$${product.price}`;
         modalDescription.innerText = product.description;
+        modalDetails.innerText = product.details;
         modalAddToCart.dataset.id = product._id;
     }
 
-    span.onclick = function() {
-        productModal.style.display = 'none';
-    }
+    closeButton.addEventListener('click', function() {
+      console.log('Close button clicked');
+      productModal.style.display = 'none';
+  });
 
-    window.onclick = function(event) {
-        if (event.target == productModal) {
-            productModal.style.display = 'none';
-        }
-    }
+    window.addEventListener('click', function(event) {
+      if (event.target === productModal) {
+          console.log('Outside modal clicked');
+          productModal.style.display = 'none';
+      }
+    });
+
+    
 });
   
