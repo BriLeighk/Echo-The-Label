@@ -34,28 +34,65 @@ document.addEventListener('DOMContentLoaded', function () {
     const detailsTextArea = document.getElementById('details');
     const errorMessagesDiv = document.getElementById('error-messages');
 
-    //Attach the input event listener to adjust the height as the user types
+    const additionalImagesInput = document.getElementById('additionalImages');
+    const additionalImagesPreview = document.getElementById('additionalImagesPreview');
+    const editAdditionalImagesInput = document.getElementById('editAdditionalImages');
+    let additionalImagesFiles = [];
 
+    // Function to add image preview and handle image removal
+    function addImagePreview(file, previewContainer) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const imgDiv = document.createElement('div');
+            imgDiv.classList.add('thumbnail');
+            imgDiv.innerHTML = `
+                <img src="${e.target.result}" alt="Additional Image">
+                <button class="delete-thumbnail">×</button>
+            `;
+            imgDiv.querySelector('.delete-thumbnail').addEventListener('click', function () {
+                imgDiv.remove();
+                additionalImagesFiles = additionalImagesFiles.filter(f => f !== file);
+            });
+            previewContainer.appendChild(imgDiv);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Handling the change event for additional images
+    additionalImagesInput.addEventListener('change', function () {
+        const newFiles = Array.from(additionalImagesInput.files);
+        additionalImagesPreview.innerHTML = '';
+        
+
+        newFiles.forEach(file => {
+            if (!additionalImagesFiles.some(f => f.name === file.name && f.size === file.size)) {
+                addImagePreview(file, additionalImagesPreview);
+                
+            }
+        });
+    });
+
+    const editAdditionalImagesPreview = document.getElementById('edit-additional-images-container');
+
+    // Attach the input event listener to adjust the height as the user types
     descriptionTextArea?.addEventListener('input', function () {
         autoExpandTextarea(descriptionTextArea);
     });
 
     detailsTextArea?.addEventListener('input', function () {
         autoExpandTextarea(detailsTextArea);
-    })
+    });
 
-    //Initial call to adjust the height when the page loads
+    // Initial call to adjust the height when the page loads
     autoExpandTextarea(descriptionTextArea);
     autoExpandTextarea(detailsTextArea);
 
-
-    //Function to automatically adjust the height of the textArea
+    // Function to automatically adjust the height of the textArea
     function autoExpandTextarea(element) {
         element.style.height = 'auto';
         element.style.height = (element.scrollHeight) + 'px';
     }
 
-    
     // Fetch categories
     function fetchCategories() {
         fetch('/api/categories')
@@ -106,15 +143,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const categoryList = document.querySelector('.categories ul');
     if (categoryList) {
         function updateShopPageCategories(categories) {
-        
-
             categoryList.innerHTML = '<li><a href="#" class="category-link" data-category="all">All</a></li>'; // Clear existing categories
             categories.forEach(category => {
                 const categoryItem = document.createElement('li');
                 categoryItem.innerHTML = `<a href="#" class="category-link" data-category="${category.name}">${category.name}</a>`;
                 categoryList.appendChild(categoryItem);
             });
-    
+
             // Attach event listener to the new category links
             const categoryLinks = document.querySelectorAll('.category-link');
             categoryLinks.forEach(link => {
@@ -124,12 +159,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     fetchProducts(category);
                 });
             });
-        }    
+        }
     } else {
         console.error('Category list element not found.');
     }
-
-
 
     categorySearchInput?.addEventListener('input', () => {
         const searchTerm = categorySearchInput.value.toLowerCase();
@@ -153,10 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
         dropdownList.classList.add('visible');
     });
 
-
-    
-
-     document.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-dropdown')) {
             dropdownList.classList.remove('visible');
         }
@@ -217,8 +247,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    
-   
     document.querySelector('.product-list')?.addEventListener('submit', function (e) {
         if (e.target.tagName === 'FORM') {
             e.preventDefault();
@@ -239,10 +267,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
         }
     });
-    
+
     fetchCategories();
     fetchProducts();
-    
 
     // Handle category deletion when confirm button is clicked
     confirmDeleteBtn?.addEventListener('click', () => {
@@ -299,9 +326,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         }
     });
-        
-
-
 
     // Close modal when the close button or cancel button is clicked
     closeModalBtn?.addEventListener('click', function () {
@@ -310,8 +334,6 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryToDelete = null;
     });
 
-        
-
     //click outside window
     window.addEventListener('click', function (event) {
         if (event.target === deleteCategoryModal) {
@@ -319,13 +341,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-
     cancelDeleteBtn.addEventListener('click', () => {
         deleteCategoryModal.style.display = 'none';
         categoryToDelete = null;
     });
-
-    
 
     const priceInput = document.getElementById('price');
     const stockInput = document.getElementById('inStock');
@@ -373,7 +392,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-    
 
     // ADD PRODUCT FORM
     addProductForm.addEventListener('submit', function (e) {
@@ -383,14 +401,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const formData = new FormData(this);
 
-        console.log('Form data before submission:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-        }
-
         if (categorySearchInput.value) {
             formData.set('category', categorySearchInput.value);
         }
+
+        additionalImagesFiles.forEach(file => {
+            formData.append('additionalImages', file);
+        });
+
+        console.log('FormData before sending:', Array.from(formData.entries()));
 
         fetch('/add-product', {
             method: 'POST',
@@ -398,11 +417,14 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => response.json())
             .then(data => {
-                console.log('Response from adding product:', data);
                 if (data.success) {
                     this.reset();
+                    additionalImagesFiles = []; // Clear the additional images files array
+                    additionalImagesInput.value = ''; // Clear the input value to allow re-upload of the same file if needed
+                    additionalImagesPreview.innerHTML = '';
                     categorySearchInput.value = '';
                     dropdownList.classList.remove('visible');
+
                     const product = data.product;
                     const productDiv = document.createElement('div');
                     productDiv.className = 'product-item';
@@ -419,7 +441,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         <form method="POST" action="/delete-product">
                             <input type="hidden" name="productId" value="${product._id}">
                             <button type="button" class="delete-button" data-id="${product._id}"><i class="fas fa-trash"></i></button>
-                            
                         </form>
                     `;
 
@@ -479,12 +500,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             });
                             console.log(`Product "${productToDelete}" deleted successfully.`);
-    
+
                             fetchProducts();
-    
+
                             deleteProductModal.style.display = 'none';
                             productToDelete = null;
-    
+
                         } else {
                             console.error(`Error deleting product: ${data.message}`);
                         }
@@ -509,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function () {
             productToDelete = null;
         });
     }
-    
+
     window.addEventListener('click', function (event) {
         if (event.target === deleteProductModal) {
             deleteProductModal.style.display = 'none';
@@ -522,7 +543,21 @@ document.addEventListener('DOMContentLoaded', function () {
             productToDelete = null;
         });
     }
-    
+
+    // Function to display additional images as thumbnails
+    function displayThumbnails(images, container) {
+        container.innerHTML = '';
+        images.forEach((imageUrl, index) => {
+            const thumbnailDiv = document.createElement('div');
+            thumbnailDiv.classList.add('thumbnail');
+            thumbnailDiv.innerHTML = `
+            <img src="${imageUrl}" alt="Product Image">
+                <button class="delete-thumbnail" data-index="${index}">&times;</button>
+            `;
+
+            container.appendChild(thumbnailDiv);
+        });
+    }
 
     // Open Edit Modal
     function openEditModal(productId) {
@@ -536,16 +571,88 @@ document.addEventListener('DOMContentLoaded', function () {
                 editProductPrice.value = product.price;
                 editProductStock.value = product.stockQuantity;
                 editProductImagePreview.src = product.imageUrl; // default image if no image exists
+                displayThumbnails(product.additionalImages, editAdditionalImagesPreview);
                 editProductModal.style.display = 'block';
+                resetAdditionalImagesInput();
             })
             .catch(error => {
                 console.error('Error fetching product:', error);
             });
     }
 
+    document.getElementById('edit-additional-images-container').addEventListener('click', function (e) {
+        if (e.target.classList.contains('delete-thumbnail')) {
+            const index = e.target.dataset.index;
+            const productId = editProductId.value;
+            const imageUrl = e.target.previousElementSibling.src.split('/uploads/')[1]; // Extract relative path
+
+            fetch('/delete-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId, imageUrl: `/uploads/${imageUrl}` })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    e.target.parentElement.remove(); // Remove the image thumbnail from the DOM
+
+                    // Update the product's additional images in the frontend
+                    const productItem = document.querySelector(`.product-item[data-product-id="${productId}"]`);
+                    if (productItem) {
+                        const additionalImagesContainer = productItem.querySelector('.additional-images-container');
+                        if (additionalImagesContainer) {
+                            const imageElement = additionalImagesContainer.querySelector(`img[src="${data.imageUrl}"]`);
+                            if (imageElement) {
+                                imageElement.parentElement.remove(); // Remove image from product tile
+                            }
+                        }
+                    }
+                } else {
+                    console.error('Error deleting image:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+                
+            fetch(`/api/product/${productId}`)
+                .then(response => response.json())
+                .then(product => {
+                    product.additionalImages.splice(index, 1); // Remove the image from the list
+                    displayThumbnails(product.additionalImages, editAdditionalImagesPreview);
+                })
+                .catch(error => {
+                    console.error('Error fetching product:', error);
+                });
+        }
+    });
+
+    document.getElementById('editAdditionalImages').addEventListener('change', function () {
+        const additionalImagesPreview = document.getElementById('edit-additional-images-container');
+        additionalImagesPreview.innerHTML = '';
+        Array.from(this.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imgDiv = document.createElement('div');
+                imgDiv.classList.add('thumbnail');
+                imgDiv.innerHTML = `
+                  <img src="${e.target.result}" alt="Additional Image">
+                  <button class="delete-thumbnail">×</button>
+                `;
+                imgDiv.querySelector('.delete-thumbnail').addEventListener('click', function () {
+                    imgDiv.remove();
+                });
+                additionalImagesPreview.appendChild(imgDiv);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
     if (editProductImageInput) {
         // Updates Edit Modal Image Display
-        editProductImageInput.addEventListener('change', function() {
+        editProductImageInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -558,54 +665,99 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    if (editProductForm) {
-        // Handle Edit Product Form Submission
-        editProductForm.addEventListener('submit', function (e) {
-            e.preventDefault();
+    editProductForm.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-            const formData = new FormData(this);
-            const productId = editProductId.value;
+        const formData = new FormData(this);
+        const productId = editProductId.value;
 
-            const fileInput = document.getElementById('edit-product-image');
-            if (fileInput && fileInput.files.length > 0) {
-                formData.append('edit-product-image', fileInput.files[0]);
-            }
-            
-            fetch(`/edit-product/${productId}`, {
-                method: 'POST',
-                body: formData
+        const fileInput = document.getElementById('edit-product-image');
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append('edit-product-image', fileInput.files[0]);
+        }
+
+        // Append additional images
+        const additionalImagesInput = document.getElementById('editAdditionalImages');
+        for (let i = 0; i < additionalImagesInput.files.length; i++) {
+            formData.append('editAdditionalImages', additionalImagesInput.files[i]);
+        }
+
+        fetch(`/edit-product/${productId}`, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchProducts();
+                    editProductModal.style.display = 'none';
+                } else {
+                    alert('Error updating product: ' + data.message);
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Response from server:', data);
-                    if (data.success) {
-                        fetchProducts();
-                        editProductModal.style.display = 'none';
-                    } else {
-                        alert('Error updating product: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while updating the product.');
-                });
-        });
-    }
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the product.');
+            });
+    });
 
-    
+    function resetAdditionalImagesInput() {
+        editAdditionalImagesInput.value = '';
+    }
+    // Event listener to delete thumbnails from edit modal
+    editAdditionalImagesPreview.addEventListener('click', function (e) {
+        if (e.target.classList.contains('delete-thumbnail')) {
+            const index = e.target.dataset.index;
+            const productId = document.getElementById('edit-product-id').value;
+            const imageUrl = e.target.previousElementSibling.src.split('/uploads/')[1]; // Extract relative path
+
+            fetch(`/delete-image`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId, imageUrl: `/uploads/${imageUrl}` }) // Send relative path
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    e.target.parentElement.remove(); // Remove the image thumbnail from the DOM
+
+                    // Update the product's additional images in the frontend
+                    const productItem = document.querySelector(`.product-item[data-product-id="${productId}"]`);
+                    if (productItem) {
+                        const additionalImagesContainer = productItem.querySelector('.additional-images-container');
+                        if (additionalImagesContainer) {
+                            const imageElement = additionalImagesContainer.querySelector(`img[src="${data.imageUrl}"]`);
+                            if (imageElement) {
+                                imageElement.parentElement.remove(); // Remove image from product tile
+                            }
+                        }
+                    }
+                } else {
+                    console.error('Error deleting image:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    });
+
     if (closeEditProductModalBtn) {
         // Close edit modal when the close button is clicked
         closeEditProductModalBtn.addEventListener('click', function () {
             editProductModal.style.display = 'none';
+            resetAdditionalImagesInput();
         });
     }
-    
 
     // Click outside window to close the edit modal
     window.addEventListener('click', function (event) {
         if (event.target === editProductModal) {
             editProductModal.style.display = 'none';
+            resetAdditionalImagesInput();
         }
     });
-
 });
+ 

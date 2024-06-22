@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema({
     imageUrl: String,
     stockQuantity: Number, // Ensure this field is present
     details: String,
-    //More Images
+    additionalImages: [String],
     //Sizing
     //Size Chart (drop down menu with + to add more?)
 });

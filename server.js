@@ -28,10 +28,10 @@ mongoose.connect(process.env.MONGO_URL, {});
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/uploads');
+    cb(null, 'public/uploads/');
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+    cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
 const upload = multer({ storage: storage });
@@ -169,28 +169,27 @@ app.post('/add-collection', checkAuth, async (req, res) => {
 });
 
 //Backend Route for adding a product //////////////////////////////////////////////////
-app.post('/add-product', checkAuth, upload.single('imageUrl'), async (req, res) => {
+app.post('/add-product', checkAuth, upload.fields([{ name: 'imageUrl', maxCount: 1 }, { name: 'additionalImages', maxCount: 10 }]), async (req, res) => {
   const { name, description, details, price, category, collectionName, inStock } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
+  const imageUrl = req.files['imageUrl'] ? `/uploads/${req.files['imageUrl'][0].filename}` : '';
+  const additionalImages = req.files['additionalImages'] ? req.files['additionalImages'].map(file => `/uploads/${file.filename}`) : [];
+
   let finalCategory = category;
 
-  console.log('Received request to add product with details:', req.body);
-
   try {
+    let existingCategory = await Category.findOne({ name: category });
 
-        let existingCategory = await Category.findOne({ name: category }); //checks if a category already exists with that name
+    if (existingCategory) {
+      finalCategory = existingCategory.name;
+    } else {
+      const newCategory = new Category({ name: category });
+      await newCategory.save();
+      finalCategory = newCategory.name;
+    }
 
-        if (existingCategory) { //if it does, stores it in finalCategory
-            finalCategory = existingCategory.name;
-            console.log(`Using existing category: ${finalCategory}`);
-        } else { //if it doesn't, creates a new category with that name and stores it in finalCategory
-            const newCategory = new Category({ name: category });
-            await newCategory.save();
-            finalCategory = newCategory.name;
-            console.log(`New category added: ${finalCategory}`);
-        } 
-    
-    const product = new Product({ name, description, details, price, category: finalCategory, collectionName, imageUrl, stockQuantity: inStock });
+    const uniqueAdditionalImages = [...new Set(additionalImages)];
+
+    const product = new Product({ name, description, details, price, category: finalCategory, collectionName, imageUrl, additionalImages: uniqueAdditionalImages, stockQuantity: inStock });
     await product.save();
     const updatedCategories = await Category.find();
 
@@ -225,6 +224,36 @@ app.post('/delete-category', checkAuth, async (req, res) => {
       res.status(500).json({ success: false, message: 'Error deleting category' });
   }
 });
+
+app.post('/delete-image', checkAuth, async (req, res) => {
+  const { productId, imageUrl } = req.body;
+  
+  try {
+      const product = await Product.findById(productId);
+      if (!product) {
+          return res.status(404).json({ success: false, message: 'Product not found' });
+      }
+
+      // Remove the image URL from the product's additionalImages array
+      const updatedImages = product.additionalImages.filter(img => img !== imageUrl);
+      product.additionalImages = updatedImages;
+      await product.save();
+
+      // Delete the image file from the filesystem
+      const imagePath = path.join(__dirname, 'public', imageUrl);
+      fs.unlink(imagePath, (err) => {
+          if (err) {
+              console.error('Error deleting image file:', err);
+              return res.status(500).json({ success: false, message: 'Error deleting image file' });
+          }
+          res.json({ success: true, imageUrl });
+      });
+  } catch (error) {
+      console.error('Error deleting image:', error);
+      res.status(500).json({ success: false, message: 'Error deleting image' });
+  }
+});
+
 
 
 app.get('/logout', (req, res) => {
@@ -286,25 +315,23 @@ app.post('/delete-product', checkAuth, async (req, res) => {
   try {
     const product = await Product.findById(productId);
     if (product) {
-      const imagePath = path.join(__dirname, 'public', product.imageUrl);
+      const imagePaths = [
+        path.join(__dirname, 'public', product.imageUrl),
+        ...product.additionalImages.map(img =>path.join(__dirname, 'public', img))
+      ];
 
-
-      // Remove the image file
-      fs.unlink(imagePath, async (err) => {
+      imagePaths.forEach(imagePath => {
+        fs.unlink(imagePath, (err) => {
           if (err) {
-              console.error('Error deleting image file:', err);
-              return res.status(500).json({ success: false, message: 'Error deleting image file' });
+            console.error('Error deleting image file:', err);
           }
+        });
+      });
 
           //Delete product from database
-          try {
-            await Product.deleteOne({ _id: productId });
-            res.json({ success: true });
-          } catch (deleteError) {
-            console.error('Error deleting product:', deleteError);
-            res.status(500).json({ success: false, message: 'Error deleting product' });
-          }  
-      });
+          
+      await Product.deleteOne({ _id: productId });
+    res.json({ success: true });
     } else {
       res.status(404).json({ success: false, message: 'Product not found' });
     }
@@ -351,39 +378,44 @@ app.get('/api/product/:id', async (req, res) => {
   }
 });
 
-app.post('/edit-product/:id', checkAuth, upload.single('edit-product-image'), async (req, res) => {
+app.post('/edit-product/:id', checkAuth, upload.fields([{ name: 'edit-product-image', maxCount: 1 }, { name: 'editAdditionalImages', maxCount: 10 }]), async (req, res) => {
   const productId = req.params.id;
   const { 'edit-product-title': name, 'edit-product-description': description, 'edit-product-details': details, 'edit-product-price': price, 'edit-product-stock': stockQuantity } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
+  const imageUrl = req.files['edit-product-image'] ? `/uploads/${req.files['edit-product-image'][0].filename}` : '';
+  const additionalImages = req.files['editAdditionalImages'] ? req.files['editAdditionalImages'].map(file => `/uploads/${file.filename}`) : [];
 
   console.log('Received edit request for product:', productId);
   console.log('Update data:', { name, description, details, price, stockQuantity, imageUrl });
-  console.log('File received:', req.file);
+  console.log('Files received:', req.files);
 
   try {
-      const updateData = { name, description, details, price, stockQuantity };
-      if (req.file) {
-          updateData.imageUrl = imageUrl;
+    const updateData = { name, description, details, price, stockQuantity };
 
-          const product = await Product.findById(productId);
-            if (product && product.imageUrl) {
-                const oldImagePath = path.join(__dirname, 'public', product.imageUrl);
-                fs.unlink(oldImagePath, (err) => {
-                    if (err) {
-                        console.error('Error deleting old image:', err);
-                    } else {
-                        console.log('Old image deleted:', oldImagePath);
-                    }
-                });
-            }
+    if (imageUrl) {
+      const product = await Product.findById(productId);
+      if (product && product.imageUrl) {
+        const oldImagePath = path.join(__dirname, 'public', product.imageUrl);
+        fs.unlink(oldImagePath, (err) => {
+          if (err) {
+            console.error('Error deleting old image:', err);
+          } else {
+            console.log('Old image deleted:', oldImagePath);
+          }
+        });
       }
+      updateData.imageUrl = imageUrl;
+    }
 
-      const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, { new: true });
-      console.log('Product updated successfully:', updatedProduct);
-      res.json({ success: true, product: updatedProduct });
+    if (additionalImages.length > 0) {
+      updateData.additionalImages = additionalImages;
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, { new: true });
+    console.log('Product updated successfully');
+    res.json({ success: true, product: updatedProduct });
   } catch (error) {
-      console.error('Error updating product:', error);
-      res.json({ success: false, message: 'Error updating product' });
+    console.error('Error updating product:', error);
+    res.json({ success: false, message: 'Error updating product' });
   }
 });
 

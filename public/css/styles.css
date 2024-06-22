@@ -35,7 +35,14 @@
 
 .modal-content form .form-group input {
     flex: 2;
-    min-width: 0; /* Allows input to shrink */
+    min-width: 0;
+    height: 30.2px;
+}
+
+.modal-content form .button-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
 
 .modal-content form .button-group.btns {
@@ -67,6 +74,7 @@
     border: none;
     border-radius: 4px;
     font-size: clamp(12px, 1.5vw, 15px);
+    font-family:Georgia, 'Times New Roman', Times, serif;
     cursor: url("../images/cursor.png"), auto;
     padding: 0.5rem 1rem; /* Adjust padding as needed */
     margin: 0.5rem;
@@ -108,7 +116,7 @@
     position: relative;
 }
 
-#loginForm input {
+#loginForm input, #createAccountForm input {
     width: 100%;
     padding: 0.5rem;
     margin-bottom: 0rem;
@@ -245,6 +253,7 @@ header {
 .echo-text {
     font-family: 'Adine-Alt', sans-serif;
     font-size: 30px;
+    font-style: normal;
     color: #3c342f;
     text-decoration: none;
     cursor: pointer;
@@ -427,6 +436,7 @@ header {
 .hero-content h1 {
     font-size: clamp(6rem, 10vw, 12vw);
     font-family:'Adine-Alt';
+    font-style: normal;
     margin-bottom: clamp(4vw, 5vw, 8vw);
 }
 
@@ -607,6 +617,10 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
 
     #add-product-title, #product-list-title {
         font-size: 30px;
+    }
+
+    input, textarea, select {
+        background-color: #ffffffa1;
     }
 
     .form-group input,
@@ -1341,6 +1355,37 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
 .add-to-cart-button {
     float: right;
 }
+
+#additionalImagesPreview, #edit-additional-images-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.thumbnail {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.delete-thumbnail {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+
 
 
 /* Responsive Design /////////////////////////////////////////////////////////////*/
