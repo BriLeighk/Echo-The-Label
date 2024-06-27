@@ -8,16 +8,30 @@
 </head>
 <body>
     <%- include('partials/header') %>
+    <h1>Collections</h1>
+
     <div class="collections-container">
-        <% collections.forEach(collection => { %>
-            <div class="collection-box" style="background-color: '<%= collection.backgroundColor %>';">
-                <img src="<%= collection.coverPhoto %>" alt="<%= collection.name %>">
-                <div class="collection-info">
-                    <h2><%= collection.name %></h2>
-                    <p><%= collection.description %></p>
+        <div class="collection-list">
+            <% collections.forEach(collection => { %>
+                <div class="collection-page-item" data-id="<%= collection._id %>" data-bgcolor="<%= collection.backgroundColor %>">
+                    <img src="<%= collection.coverPhoto %>" alt="<%= collection.name %>" >
+                    <div>
+                        <h2><%= collection.name %></h2>
+                        <p class="description"><%= collection.description %></p>
+                    </div>
                 </div>
-            </div>
-        <% }) %>
+            <% }) %>
+        </div>
     </div>
+    <script src="/js/manage-products.js"></script>
+    <script src="/js/header.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.collection-page-item').forEach(item => {
+                const bgColor = item.getAttribute('data-bgcolor');
+                item.style.backgroundColor = `#${bgColor}`;
+            });
+        });
+    </script>
 </body>
 </html>

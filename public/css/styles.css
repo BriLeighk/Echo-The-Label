@@ -74,7 +74,7 @@
     border: none;
     border-radius: 4px;
     font-size: clamp(12px, 1.5vw, 15px);
-    font-family:Georgia, 'Times New Roman', Times, serif;
+    font-family: 'Bodoni-Alt';
     cursor: url("../images/cursor.png"), auto;
     padding: 0.5rem 1rem; /* Adjust padding as needed */
     margin: 0.5rem;
@@ -96,7 +96,7 @@
 
 .modal-content {
     background-color: #f9f2e6;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 1% auto; /* 15% from the top and centered */
     padding: 20px;
     border: 2px solid #888;
     width: clamp(200px, 70vw, 70vw); /* Could be more or less, depending on screen size */
@@ -175,14 +175,108 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'Baskervville';
+    src: url('../fonts/Baskervville-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Baskervville-Italic';
+    src: url('../fonts/Baskervville-Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Rundkursiv';
+    src: url('../fonts/Rundkursiv.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Dubiel-Plain';
+    src: url('../fonts/DubielPlain.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Dubiel-Italic';
+    src: url('../fonts/DubielItalic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BeachmanScript';
+    src: url('../fonts/BeachmanScript.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'GreatVictorian';
+    src: url('../fonts/GreatVictorian-Standard.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'GreatVictorian-Swashed';
+    src: url('../fonts/GreatVictorian-Swashed.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Niconne';
+    src: url('../fonts/Niconne-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'HenriDidot';
+    src: url('../fonts/HenriDidot.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Vanity';
+    src: url('../fonts/Vanity-Light.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'BodoniModa';
+    src: url('../fonts/BodoniModa-Italic-VariableFont_opsz\,wght.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Bodoni-Alt';
+    src: url('../fonts/BodoniModa-VariableFont_opsz\,wght.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+
+
 /* General Styles ////////////////////////////////////////////////////////////////////////////*/
 
 body, html {
     margin: 0;
     padding: 0;
     text-align: center;
-    font-family: 'Odstemplik-Bold'; /* Change Fonts & Color Scheme */
-    font-size: 20px;
+    font-family: 'Bodoni-Alt'; /* Change Fonts & Color Scheme */
+    font-size: 15px;
     background-image: url("../images/background-cream.jpg");
     background-position: center center fixed;
     cursor: url("../images/cursor.png"), auto;
@@ -200,7 +294,7 @@ body, html {
 header {
     width: 100%;
     height: 100px;
-    background-color: #ede9e1c2; /* #1c0e0bd4 */
+    background-color: #e8e8e2bd; /* #1c0e0bd4 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -299,19 +393,19 @@ header {
 }
 
 .left-icons a, .right-icons a {
-    margin: 1rem;
+    margin: 0.3rem;
     display: inline-block;
 }
 
 
 .left-icons img, .right-icons img, .icon.profile-icon img {
-    width: 45px;
-    height: 45px;
+    width: 35px;
+    height: 35px;
     transition: opacity 0.3s;
 }
 
 .icon.profile-icon {
-    padding-bottom: 3vh;
+    padding-bottom: 2vh;
 }
 
 /* Social media icons styling */
@@ -380,7 +474,7 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
+    height: 80vh;
     background-image: url('../images/hero-background-white.jpg'); /* que es esso? */
     background-size: cover;
     background-position: center;
@@ -404,7 +498,7 @@ header {
 
 .hero-home {
     position: relative;
-    background-image: url('../images/hero-background-white.jpg'); /* que es esso? */
+    background-image: url('../images/high-res.jpg'); /* que es esso? */
     background-size: cover;
     background-position: center center;
     height: 10vh;
@@ -441,10 +535,10 @@ header {
 }
 
 .hero-content .btn {
-    background-color: #f8eddcb6;
+    background-color: #e8e8e2bd;
     color: #3c342f;
     padding: clamp(0.5vw, 1vw, 2vw) clamp(1.5vw, 2vw, 3vw);
-    font-size: clamp(1.2rem, 2.5vw, 3vw);
+    font-size: clamp(15px, 2vw, 20px);
     text-decoration: none;
     border-radius: 4px;
     transition: opacity 0.3s;
@@ -472,33 +566,45 @@ header {
 .about-content {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2vw;
+    padding: 2rem;
 }
 
 .about-image {
     width: 100%;
-    height: clamp(300px, 80vw, 700px);
+    height: clamp(200px, 60vw, 900px);
     width: auto;
     display: block;
     margin-right: 18px;
     border-radius: 4px; /* rounds the corners of the about image */
 }
 
+.about-text-container {
+    font-size: clamp(15px, 2vw, 30px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 700px;
+    margin: clamp(5px, 2vw, 30px);
+    
+}
+
 #about-text {
+    margin-top: 0;
+    padding-top: 0;
     color: #3c342f;
     flex-wrap: wrap;
-    margin-left: 18px;
-    font-size: 20px;
-    text-align: left;
 }
 
 
 /* Footer ///////////////////////////////////////////////////////////////////////*/
 footer {
     width: 100%;
-    height: 100px;
-    background-color: #ede9e1c2;
+    height: auto;
+    background-color: #e8e8e2bd;
     align-items: center;
     justify-content: center;
     display: flex;
@@ -506,6 +612,8 @@ footer {
     opacity: 0;
     transition: opacity 2.5s ease-in-out;
     z-index: 1000;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
 footer.hidden {
@@ -519,7 +627,6 @@ footer.show {
 
 
 footer .footer-links a {
-    font-size: 20px;
     margin: 15px;
     text-decoration: none;
     color: #3c342f;
@@ -528,13 +635,13 @@ footer .footer-links a {
 }
 
 footer .social-media-icons a {
-    margin: 0 0.4rem;
-    margin-top: 0.1rem;
+    margin: 0 0rem;
+    margin-bottom: 3rem;
     transition: opacity 0.3s;
 }
 
 /* Hover Effects //////////////////////////////////////////////////////////////////*/
-a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .collection-item:hover {
+a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover {
     opacity: 0.7;
     cursor: url("../images/cursor.png"), auto;
 }
@@ -545,6 +652,7 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
 .dashboard-container {
     display: flex;
     min-height: 100vh;
+    font-family: 'Odstemplik-Bold';
 }
 
 .sidebar {
@@ -556,6 +664,34 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     padding: 20px;
     flex-shrink: 0; /* prevents the sidebar from shrinking */
+    transition: width 0.3s ease, padding 0.3s ease; /* Smooth transition for the width change */
+    position: relative;
+    font-size: 20px;
+}
+
+.sidebar.minimized {
+    width: 10px;
+    padding: 10px 5px;
+}
+
+.sidebar.minimized .nav-links,
+.sidebar.minimized .sign-out-container {
+    display: none;
+}
+
+.toggle-sidebar {
+    position: absolute;
+    right: -10px; /* Adjust as needed */
+    transform: translateY(1000%);
+    background: #e5e0e0;
+    color: #000000;
+    border: none;
+    padding: 5px;
+    border-radius: 50%;
+    z-index: 1;
+    font-size: 18px;
+    transition: transform 0.3s ease;
+    
 }
 
 .content-container {
@@ -588,11 +724,11 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
 .nav-links {
     display: flex;
     flex-direction: column;
+    font-size: 20px;
 }
 
 .nav-link {
     margin-bottom: 1rem;
-    font-size: 16px; /* Fixed size */
 }
 
 .sign-out-container {
@@ -613,19 +749,34 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         width: 150px; /* Adjust this value based on your design needs */
         margin-right: 1rem;
         font-size: 20px;
+        height: 27.2px;
+        flex-shrink: 0;
     }
 
-    #add-product-title, #product-list-title {
+    #add-product-title, #product-list-title, 
+    #add-collection-title, #collection-list-title {
         font-size: 30px;
     }
 
     input, textarea, select {
         background-color: #ffffffa1;
+        font-family: 'Bodoni-Alt';
+        font-size: 14px;
+    }
+    
+
+    .add-collection-section .form-group #collection-name,
+    .add-collection-section .form-group #description,
+    .add-collection-section .form-group select,
+    .add-product-section .form-group input,
+    .add-product-section .form-group select {
+        width: 250px;
+        height: 25px;
     }
 
-    .form-group input,
-    .form-group select {
-        width: 250px;
+    .add-collection-section .form-group #textColor,
+    .add-collection-section .form-group #backgroundColor {
+        width: 220px;
         height: 25px;
     }
 
@@ -654,7 +805,7 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         overflow: auto; /* Prevents the scrollbars from appearing */
     }
     
-    .add-product-section #description, .add-product-section #details{
+    .add-product-section #description, .add-product-section #details, #additionalImagesContainer input{
         height: 30.2px;
         width: 257.2px;
         position: relative;
@@ -664,12 +815,32 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         text-align: left;
     }
 
+    .search-filter-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    
+    #search-input {
+        width: 30%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    #filter-category, #filter-collection {
+        width: 30%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
     
 
 
     /*Manage Products List ----- Mini Project Tiles /////////////////////////////////// */
         /* Manage Products Section */
-    .manage-products-container {
+    .manage-products-container, .manage-collections-container {
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap;
@@ -677,19 +848,25 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         padding-right: 0rem;
     }
     
-    .add-product-section {
+    .add-product-section, .add-collection-section {
         flex: 1 1 30%;
         box-sizing: border-box;
         text-align: center;
         padding-right: 0;
         
     }
+
+    
     
     .add-product-section button {
-        margin-top: 1em;
+        margin-top: 1rem;
+    }
+
+    .add-collection-section button {
+        margin-top: 3.5rem;
     }
     
-    .product-list-section {
+    .product-list-section, .collection-list-section {
         flex: 1 1 30%;
         box-sizing: border-box;
         justify-content: center;
@@ -700,6 +877,8 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         display: none;
     }
 
+
+
     
 
 
@@ -708,7 +887,7 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         --product-height: auto; /* Default height */
     }
     
-    .product-list {
+    .product-list, .collection-list {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
@@ -729,12 +908,13 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         width: var(--product-width);
         height: var(--product-height);
         box-sizing: border-box;
-        transition: transform 0.3s ease;
+        transition: transform 0.5s ease;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
         position: relative; /* Add this line */
     }
+
 
     .product-item:hover {
         transform: translateY(-5px);
@@ -834,18 +1014,23 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         flex-direction: row;
         justify-content: center;
         row-gap: 40px; /* Adjust this to change the space between the image and form */
-        column-gap: 20px;
+        column-gap: 40px;
         flex-wrap: wrap;
         margin: 0;
         padding: 0;
     }
 
     .edit-product-button-container {
-        width: 250px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+    }
+
+    #edit-additional-images-container {
+        display: flexbox;
+        width: 87%;
+        justify-content: left;
     }
 
     .edit-modal-content form {
@@ -861,9 +1046,14 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         justify-content: center;
         align-items: center;
         padding-bottom: 10px;
-        width: 200px;
-        height: 300px;
+        width: 300px;
+        height: auto;
 
+    }
+
+    #edit-product-image, #editAdditionalImages {
+        width: 180px;
+        height: 25px;
     }
 
     
@@ -882,11 +1072,12 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         display: flex;
         margin: 0;
         padding: 0;
-        padding-left: 60px;
+        padding-top: 10px;
         width: auto;
         justify-content: center;
         align-items: center;
     }
+    
     .edit-product-button-container .form-group input{
         margin: 0;
         padding: 0;
@@ -896,11 +1087,10 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
     }
 
     .edit-product-button-container .form-group label {
-        width: 50px;
         margin: 0;
         padding: 0;
         padding-right: 10px;
-        text-align: center;
+        text-align: left;
     }
 
     
@@ -914,6 +1104,8 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         padding: 0;
         margin: 0;
     }
+
+
 
 
 /* Style the navigation links and sign-out button ////////////////////////////////////////// */
@@ -930,40 +1122,7 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
     background-color: #e0d8d1bb;
 }
 
-.collections-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    padding: 20px;
-  }
-  
-  .collection-box {
-    width: 100%;
-    max-width: 500px;
-    margin: 20px;
-    padding: 20px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .collection-box img {
-    max-width: 100px;
-    margin-right: 20px;
-  }
-  
-  .collection-info {
-    flex: 1;
-  }
-  
-  .collection-info h2 {
-    margin: 0;
-    font-size: 1.5em;
-  }
-  
-  .collection-info p {
-    margin: 10px 0 0;
-  }
+
 
   
 
@@ -1024,7 +1183,7 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
         height: 30.2px;
     }
 
-    #imageUrl {
+    #imageUrl, #coverPhoto {
         width: 257.2px;
         height: 30.2px;
     }
@@ -1315,7 +1474,7 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
 .shop-modal-left {
     justify-content: flex-start;
     align-items: flex-start;
-    width: 40%;
+    width: 50%;
 }
 
 .shop-modal-left #modalDetails, #modalDescription {
@@ -1330,14 +1489,22 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
 
 .modalImage-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: left;
+    align-items: left;
     padding-bottom: 10px;
     width: 100%;
-    height: auto;
+    height: 450px;
+}
+
+#additionalImagesContainer  {
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    width: 100%;
 }
 
 .modalImage-container img {
+    transition: ease-in-out 0.7s;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1356,16 +1523,17 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
     float: right;
 }
 
-#additionalImagesPreview, #edit-additional-images-container {
+#additionalImagesPreview, #edit-additional-images-container, #additionalImagesContainer {
     display: flex;
     flex-wrap: wrap;
+    flex-direction: row;
     gap: 10px;
 }
 
 .thumbnail {
     position: relative;
-    width: 100px;
-    height: 100px;
+    width: 50px;
+    height: 50px;
 }
 
 .thumbnail img {
@@ -1386,7 +1554,134 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
 }
 
 
+/* Collections Page & Form in Owner Dashboard //////////////////////////////////////////////////////////////*/
+.collection-item, .collection-page-item {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    color: var(--text-color); /* CSS variables for dynamic styling of text */
+    background-color: var(--background-color); /* CSS variables for dynamic styling of background color */
+}
 
+.collection-item {
+    height: 100px;
+    padding: 15px;
+}
+
+.collection-page-item {
+    height: 300px;
+    padding: 25px;
+}
+
+.collection-item img {
+    width: auto;
+    height: 100px;
+    border-radius: 4px;
+    margin-right: 20px;
+}
+
+.collection-page-item img {
+    width: auto;
+    height: 300px;
+    border-radius: 4px;
+    margin-right: 20px;
+}
+
+.collection-item h2, .collection-page-item h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+}
+
+.collection-item p, .collection-page-item p{
+    margin: 0;
+    font-size: 16px;
+}
+
+.collection-page-item .description {
+    margin: 0;
+}
+
+.collection-item button.delete-button {
+    padding-top: 75px; /* aligns delete button with bottom of container */
+    margin-left: auto;
+    color: rgb(184, 38, 38);
+    background-color: transparent;
+    border: none;
+    font-size: 15px;
+    
+}
+
+.collection-item button.delete-button:hover {
+    opacity: 0.7;
+    cursor: url('../images/cursor.png');
+}
+
+.add-collection-section .form-group #textColorPicker, .add-collection-section .form-group #backgroundColorPicker {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    padding: 0;
+}
+
+.collections-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.collection-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+}
+
+.collections {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px;
+}
+
+.collection {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    padding: 15px;
+    color: var(--text-color); /* CSS variables for dynamic styling of text */
+    background-color: var(--background-color); /* CSS variables for dynamic styling of background color */
+}
+
+.collection img {
+    width: 80px;
+    height: auto;
+    border-radius: 4px;
+    margin-right: 20px;
+}
+
+.collection h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+}
+
+.collection p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.collection div {
+    flex: 1;
+}
+
+/* Collection Preview in Owner Dashboard /////////////////////////////////////////*/
+    .collection-preview-section {
+        margin-top: 20px;
+    }
 
 /* Responsive Design /////////////////////////////////////////////////////////////*/
 @media (max-width: 600px) {
@@ -1416,10 +1711,12 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover, .col
     }
 
     .modalImage-container {
-        height: auto;
+        width: 100%;
+        height: 600px;
     }
 
     .modalImage-container img {
+        transition: ease-in-out 0.7s;
         width: 80%;
         height: auto;
     }

@@ -19,31 +19,65 @@
                 <a href="#" class="nav-link" data-page="orders">Orders</a>
                 <a href="#" class="nav-link" data-page="analytics">Analytics</a>
             </div>
+            <button id="toggle-sidebar" class="toggle-sidebar">⮜</button>
             <div class="sign-out-container">
                 <a href="#" id="sign-out">Sign Out</a>
             </div>
         </div>
         <div class="content-container">
             <div class="content">
-                <div id="home" class="content-page active">
-                    <h1>Owner Profile</h1>
-                    <p>Some Owner Profile information here + Brand Information...</p>
-                </div>
                 <div id="collections" class="content-page">
                     <h1>Manage Collections</h1>
-                    <form id="add-collection-form" method="POST" action="/add-collection" enctype="multipart/form-data">
-                        <label for="name">Collection Name</label>
-                        <input type="text" id="name" name="name" required>
-                        <label for="description">Description</label>
-                        <input type="text" id="description" name="description" required>
-                        <label for="details">Details</label>
-                        <input type="text" id="details" name="details" required>
-                        <label for="coverPhoto">Cover Photo URL</label>
-                        <input type="file" id="coverPhoto" name="coverPhoto" required>
-                        <label for="backgroundColor">Background Color (Hex Code)</label>
-                        <input type="text" id="backgroundColor" name="backgroundColor" required>
-                        <button type="submit">Add Collection</button>
-                    </form>
+                    <div class="manage-collections-container">
+                        <!-- Add Collection Section -->
+                        <div class="add-collection-section">
+                            <h2 id="add-collection-title">Add Collection</h2>
+
+                            <!-- Collection Preview Section -->
+                            <div class="collection-preview-section">
+                                <div id="collection-preview" class="collection-item" style="background-color: #ffffff; color: #000000;">
+                                    <img id="preview-cover-photo" src="" alt="Cover Photo" style="display: none;">
+                                    <div>
+                                        <h2 id="preview-name">Collection Name</h2>
+                                        <p id="preview-description" class="description">Description</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form id="add-collection-form" method="POST" action="/add-collection" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label for="collection-name">Collection Name</label>
+                                    <input type="text" id="collection-name" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <input type="text" id="description" name="description" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coverPhoto">Cover Photo</label>
+                                    <input type="file" id="coverPhoto" name="coverPhoto" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="textColor">Text Color</label>
+                                    <input type="color" id="textColorPicker">
+                                    <input type="text" id="textColor" name="textColor" placeholder="e.g. 000000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="backgroundColor">Background Color</label>
+                                    <input type="color" id="backgroundColorPicker">
+                                    <input type="text" id="backgroundColor" name="backgroundColor" placeholder="e.g. FFFFFF" required>
+                                </div>
+                                <button type="submit">Add Collection</button>
+                            </form>
+                        </div>
+                        <!-- Collection List Section -->
+                        <div class="collection-list-section">
+                            <h2 id="collection-list-title">Collection List</h2>
+                            <div class="collection-list">
+                                <!-- Collection items will be dynamically inserted here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="products" class="content-page">
@@ -89,6 +123,7 @@
                                     <label for="collectionName">Collection (Optional)</label>
                                     <select id="collectionName" name="collectionName"></select> <!-- Still need to add this functionality -->
                                 </div>
+                                
                                 <div class="form-group">
                                     <label for="imageUrl">Primary Image</label>
                                     <input type="file" id="imageUrl" name="imageUrl" required>
@@ -96,7 +131,9 @@
 
                                 <div class="form-group">
                                     <label for="additionalImages">Additional Images</label>
-                                    <input type="file" id="additionalImages" name="additionalImages" accept="image/*" multiple>
+                                    <div id="additionalImagesContainer">
+                                        <input type="file" id="additionalImages" name="additionalImages" accept="image/*" multiple>
+                                    </div>
                                     
                                 </div>
                                 <div id="additionalImagesPreview" class="additionalImagesPreview"></div> <!-- Container to preview additional images-->
@@ -106,6 +143,18 @@
                         <!-- Product List Section -->
                         <div class="product-list-section">
                             <h2 id="product-list-title">Product List</h2>
+                            <!-- Search and Filter Section -->
+                            <div class="search-filter-container">
+                                <input type="text" id="search-input" placeholder="Search...">
+                                <select id="filter-category">
+                                    <option value="">Filter by Category</option>
+                                    <!-- Categories will be dynamically populated -->
+                                </select>
+                                <select id="filter-collection">
+                                    <option value="">Filter by Collection</option>
+                                    <!-- Collections will be dynamically populated -->
+                                </select>
+                            </div>
                             <div class="product-list">
                                 <!-- Product items will be dynamically inserted here -->
                             </div>
@@ -167,6 +216,9 @@
                     <div class="edit-product-image-container">
                         <img id="edit-product-image-preview" src="" alt="Current Product Image">
                     </div>
+                    <div id="edit-additional-images-container" class="additionalImages">
+                        <!-- Thumbnails of additional images will be displayed here -->
+                    </div>
                     <div class="form-group">
                         <label for="edit-product-image">Image</label>
                         <input type="file" id="edit-product-image" name="edit-product-image" accept="image/*">
@@ -176,9 +228,7 @@
                         <input type="file" id="editAdditionalImages" name="editAdditionalImages" accept="image/*" multiple>
                     </div>
                     
-                    <div id="edit-additional-images-container" class="additionalImages">
-                        <!-- Thumbnails of additional images will be displayed here -->
-                    </div>
+                    
                     
                 </div>
                 

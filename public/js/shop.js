@@ -68,8 +68,19 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeButton = document.querySelector('.product-modal .close');
   const additionalImagesContainer = document.getElementById('additionalImagesContainer');
 
-  function displayThumbnails(images, container) {
+  function displayThumbnails(images, primaryImage, container) {
       container.innerHTML = '';
+
+      if (primaryImage) {
+        const primaryImageDiv = document.createElement('div');
+        primaryImageDiv.classList.add('thumbnail');
+        primaryImageDiv.innerHTML = `<img src="${primaryImage}" alt="Primary Image">`;
+        primaryImageDiv.addEventListener('click', () => {
+            modalImage.src = primaryImage;
+        });
+        container.appendChild(primaryImageDiv);
+    }
+
       images.forEach(imageUrl => {
           const thumbnailDiv = document.createElement('div');
           thumbnailDiv.classList.add('thumbnail');
@@ -92,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
               modalDescription.innerText = product.description;
               modalDetails.innerText = product.details;
               modalAddToCart.dataset.id = product._id;
-              displayThumbnails(product.additionalImages, additionalImagesContainer);
+              displayThumbnails(product.additionalImages, product.imageUrl, additionalImagesContainer);
           })
           .catch(error => {
               console.error('Error fetching product:', error);

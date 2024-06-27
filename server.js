@@ -155,16 +155,51 @@ app.get('/partials/header', (req, res) => {
 
 
 //Backend Route for adding a collection ////////////////////////////////////////////////
-app.post('/add-collection', checkAuth, async (req, res) => {
-  const { name, description, backgroundColor } = req.body;
+app.post('/add-collection', checkAuth, upload.single('coverPhoto'), async (req, res) => {
+  const { name, description, textColor, backgroundColor } = req.body;
   const coverPhoto = req.file ? `/uploads/${req.file.filename}` : '';
+
   try {
-    const collection = new Collection({ name, description, coverPhoto, backgroundColor });
+    // Check if a collection with the same name already exists
+    const existingCollection = await Collection.findOne({ name });
+    if (existingCollection) {
+      return res.json({ success: false, message: 'A collection with this name already exists.' });
+    }
+
+    const collection = new Collection({ name, description, coverPhoto, textColor, backgroundColor });
     await collection.save();
-    res.redirect('/owner-dashboard');
+    console.log('Collection added successfully');
+    res.json({ success: true, collection });
   } catch (error) {
     console.error('Error adding collection:', error);
-    res.redirect('/owner-dashboard');
+    res.json({ success: false, message: 'Error adding collection' });
+  }
+});
+
+
+//Backend Route to handle collection deletion /////////////////////////////////////////
+app.post('/delete-collection', checkAuth, async (req, res) => {
+  const { collectionId } = req.body;
+  try {
+    const collection = await Collection.findByIdAndDelete(collectionId);
+    if (!collection) {
+      return res.status(404).json({ success: false, message: 'Collection not found' });
+    }
+
+    // remove the cover photo from the file system
+    if (collection.coverPhoto) {
+      const coverPhotoPath = path.join(__dirname, 'public', collection.coverPhoto);
+      fs.unlink(coverPhotoPath, (err) => {
+        if (err) {
+          console.error('Error deleting cover photo:', err);
+        }
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting collection:', error);
+    res.json({ success: false, message: 'Error deleting collection' });
   }
 });
 
@@ -187,9 +222,7 @@ app.post('/add-product', checkAuth, upload.fields([{ name: 'imageUrl', maxCount:
       finalCategory = newCategory.name;
     }
 
-    const uniqueAdditionalImages = [...new Set(additionalImages)];
-
-    const product = new Product({ name, description, details, price, category: finalCategory, collectionName, imageUrl, additionalImages: uniqueAdditionalImages, stockQuantity: inStock });
+    const product = new Product({ name, description, details, price, category: finalCategory, collectionName, imageUrl, additionalImages, stockQuantity: inStock });
     await product.save();
     const updatedCategories = await Category.find();
 
@@ -282,30 +315,48 @@ app.get('/shop', async (req, res) => {
 });
 
 
-app.get('/collections', async (req, res) => {
+app.get('/api/collections', checkAuth, async (req, res) => {
   try {
-    const collections = await Collection.find().exec();
+    const collections = await Collection.find();
+    res.json(collections);
+  } catch (error) {
+    console.error('Error fetching collections:', error);
+    res.status(500).json({ success: false, message: 'Error fetching collections' });
+  }
+});
+
+app.get('/collections', checkAuth, async (req, res) => {
+  try {
+    const collections = await Collection.find();
     res.render('collections', { collections });
   } catch (error) {
     console.error('Error fetching collections:', error);
-    res.render('error', { message: 'Error fetching collections' });
+    res.status(500).send('Error fetching collections');
   }
 });
 
 app.get('/api/products', async (req, res) => {
   try {
-    const category = req.query.category;
-    let products;
+    const { category, collection, search } = req.query;
+    let query = {};
+
     if (category && category !== 'all') {
-      products = await Product.find({ category });
-    } else {
-      products = await Product.find();
+        query.category = category;
     }
-    console.log('Fetched products:', products); // Add this line
+
+    if (collection && collection !== 'all') {
+        query.collectionName = collection;
+    }
+
+    if (search) {
+        query.name = { $regex: search, $options: 'i' }; // Case-insensitive search
+    }
+
+    const products = await Product.find(query);
     res.json(products);
-  } catch (error) {
+} catch (error) {
     res.status(500).json({ message: 'Error fetching products' });
-  }
+}
 });
 
 

@@ -26,18 +26,134 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const editProductImageInput = document.getElementById('edit-product-image');
     const editProductImagePreview = document.getElementById('edit-product-image-preview');
-
     let categoryToDelete = null;
     let productToDelete = null;
 
-    const descriptionTextArea = document.getElementById('description');
-    const detailsTextArea = document.getElementById('details');
     const errorMessagesDiv = document.getElementById('error-messages');
-
+    const additionalImagesInputContainer = document.getElementById('additionalImagesContainer');
     const additionalImagesInput = document.getElementById('additionalImages');
     const additionalImagesPreview = document.getElementById('additionalImagesPreview');
     const editAdditionalImagesInput = document.getElementById('editAdditionalImages');
     let additionalImagesFiles = [];
+
+    const searchInput = document.getElementById('search-input');
+    const filterCategory = document.getElementById('filter-category');
+    const filterCollection = document.getElementById('filter-collection');
+
+    const addCollectionForm = document.getElementById('add-collection-form'); //form to add collection
+    const collectionList = document.querySelector('.collection-list'); //list of collections in owner dashboard (for CRUD operations)
+
+    const nameInput = document.getElementById('collection-name');
+    const descriptionInput = document.getElementById('description');
+    const coverPhotoInput = document.getElementById('coverPhoto');
+    const backgroundColorPicker = document.getElementById('backgroundColorPicker');
+    const backgroundColorInput = document.getElementById('backgroundColor');
+    const textColorPicker = document.getElementById('textColorPicker');
+    const textColorInput = document.getElementById('textColor');
+
+    const previewName = document.getElementById('preview-name');
+    const previewDescription = document.getElementById('preview-description');
+    const previewCoverPhoto = document.getElementById('preview-cover-photo');
+    const collectionPreview = document.getElementById('collection-preview');
+
+    console.log('Script loaded');
+
+    // Add event listeners with logging
+    if (nameInput) {
+        console.log('Name input found:', nameInput);
+        nameInput.addEventListener('input', (e) => {
+            console.log('Name input event:', e.target.value);
+            updatePreview();
+        });
+    } else {
+        console.error('Name input not found');
+    }
+
+    descriptionInput.addEventListener('input', (e) => {
+        console.log('Description input event:', e.target.value);
+        updatePreview();
+    });
+    coverPhotoInput.addEventListener('change', (e) => {
+        console.log('Cover photo change event:', e.target.value);
+        updatePreview();
+    });
+    backgroundColorInput.addEventListener('input', (e) => {
+        console.log('Background color input event:', e.target.value);
+        updatePreview();
+    });
+    textColorInput.addEventListener('input', (e) => {
+        console.log('Text color input event:', e.target.value);
+        updatePreview();
+    });
+
+    function updatePreview() {
+        console.log('Updating preview...');
+
+        const nameValue = nameInput.value;
+        console.log('Name input value:', nameValue);
+        previewName.textContent = nameValue || 'Collection Name';
+        console.log('Preview name text:', previewName.textContent);
+
+        const descriptionValue = descriptionInput.value;
+        console.log('Description input value:', descriptionValue);
+        previewDescription.textContent = descriptionValue || 'Description';
+        console.log('Preview description text:', previewDescription.textContent);
+
+        const backgroundColor = backgroundColorInput.value;
+        console.log('Background color value:', backgroundColor);
+        if (backgroundColor) {
+            collectionPreview.style.backgroundColor = `#${backgroundColor}`;
+        } else {
+            collectionPreview.style.backgroundColor = '#ffffff';
+        }
+        console.log('Collection preview background color:', collectionPreview.style.backgroundColor);
+
+        const textColor = textColorInput.value;
+        console.log('Text color value:', textColor);
+        if (textColor) {
+            collectionPreview.style.color = `#${textColor}`;
+        } else {
+            collectionPreview.style.color = '#000000';
+        }
+        console.log('Collection preview text color:', collectionPreview.style.color);
+
+        const file = coverPhotoInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewCoverPhoto.src = e.target.result;
+                previewCoverPhoto.style.display = 'block';
+                console.log('Cover photo preview updated');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewCoverPhoto.style.display = 'none';
+            console.log('No cover photo selected');
+        }
+    }
+
+    updatePreview(); // Initial preview update
+
+
+
+
+    // Handling the change event for the additional images
+    function handleAdditionalImagesInputChange(e) {
+        const newFiles = Array.from(e.target.files);
+        newFiles.forEach(file => {
+            if (!additionalImagesFiles.some(f => f.name === file.name && f.size === file.size)) {
+                additionalImagesFiles.push(file);
+                addImagePreview(file, additionalImagesPreview);
+            }
+        });
+
+        e.target.value = '';
+        const newInput = e.target.cloneNode(); //Clones input field to allow more files to be added
+        newInput.addEventListener('change', handleAdditionalImagesInputChange);
+        e.target.parentNode.replaceChild(newInput, e.target);
+    }
+
+    additionalImagesInputContainer.querySelector('input').addEventListener('change', handleAdditionalImagesInputChange);
 
     // Function to add image preview and handle image removal
     function addImagePreview(file, previewContainer) {
@@ -58,42 +174,173 @@ document.addEventListener('DOMContentLoaded', function () {
         reader.readAsDataURL(file);
     }
 
-    // Handling the change event for additional images
-    additionalImagesInput.addEventListener('change', function () {
-        const newFiles = Array.from(additionalImagesInput.files);
-        additionalImagesPreview.innerHTML = '';
-        
+    const editAdditionalImagesPreview = document.getElementById('edit-additional-images-container');
+    let editAdditionalImagesFiles = []; // Store the current additional images
 
+    const sidebar = document.querySelector('.sidebar');
+    const toggleButton = document.getElementById('toggle-sidebar');
+
+    toggleButton.addEventListener('click', function () {
+        sidebar.classList.toggle('minimized');
+        if (sidebar.classList.contains('minimized')) {
+            toggleButton.textContent = '⮞'; // Change icon to right arrow
+        } else {
+            toggleButton.textContent = '⮜'; // Change icon to left arrow
+        }
+    });
+
+    function openEditModal(productId) {
+        fetch(`/api/product/${productId}`)
+            .then(response => response.json())
+            .then(product => {
+                editProductId.value = product._id;
+                editProductTitle.value = product.name;
+                editProductDescription.value = product.description;
+                editProductDetails.value = product.details;
+                editProductPrice.value = product.price;
+                editProductStock.value = product.stockQuantity;
+                editProductImagePreview.src = product.imageUrl; // default image if no image exists
+
+                // Display existing additional images
+                editAdditionalImagesFiles = product.additionalImages.slice(); // Copy existing additional images to the list
+                displayThumbnails(product.imageUrl, product.additionalImages, editAdditionalImagesPreview);
+                editProductModal.style.display = 'block';
+                resetAdditionalImagesInput();
+            })
+            .catch(error => {
+                console.error('Error fetching product:', error);
+            });
+    }
+
+    function displayThumbnails(primaryImageUrl, images, container) {
+        container.innerHTML = '';
+
+        // Display primary image
+        if (primaryImageUrl) {
+            const primaryImageDiv = document.createElement('div');
+            primaryImageDiv.classList.add('thumbnail');
+            primaryImageDiv.innerHTML = `
+                <img src="${primaryImageUrl}" alt="Primary Image">
+                <button class="delete-thumbnail" data-index="primary">&times;</button>
+            `;
+            container.appendChild(primaryImageDiv);
+        }
+
+        // Display additional images
+        images.forEach((imageUrl, index) => {
+            const thumbnailDiv = document.createElement('div');
+            thumbnailDiv.classList.add('thumbnail');
+            thumbnailDiv.innerHTML = `
+                <img src="${imageUrl}" alt="Product Image">
+                <button class="delete-thumbnail" data-index="${index}">&times;</button>
+            `;
+
+            container.appendChild(thumbnailDiv);
+        });
+    }
+
+    function handleEditAdditionalImagesInputChange(e) {
+        const newFiles = Array.from(e.target.files);
         newFiles.forEach(file => {
-            if (!additionalImagesFiles.some(f => f.name === file.name && f.size === file.size)) {
-                addImagePreview(file, additionalImagesPreview);
-                
+            if (!editAdditionalImagesFiles.some(f => f.name === file.name && f.size === file.size)) {
+                editAdditionalImagesFiles.push(file);
+                addImagePreview(file, editAdditionalImagesPreview);
             }
+        });
+
+        e.target.value = '';
+        const newInput = e.target.cloneNode();
+        newInput.addEventListener('change', handleEditAdditionalImagesInputChange);
+        e.target.parentNode.replaceChild(newInput, e.target);
+    }
+
+    editAdditionalImagesInput.addEventListener('change', handleEditAdditionalImagesInputChange);
+
+    document.getElementById('edit-additional-images-container').addEventListener('click', function (e) {
+        if (e.target.classList.contains('delete-thumbnail')) {
+            const index = e.target.dataset.index;
+            const productId = document.getElementById('edit-product-id').value;
+            const imageUrl = e.target.previousElementSibling.src.split('/uploads/')[1]; // Extract relative path
+
+            fetch('/delete-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId, imageUrl: `/uploads/${imageUrl}` })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    e.target.parentElement.remove(); // Remove the image thumbnail from the DOM
+
+                    // Update the product's additional images in the frontend
+                    editAdditionalImagesFiles = editAdditionalImagesFiles.filter(file => file.name !== imageUrl.split('/').pop());
+                } else {
+                    console.error('Error deleting image:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    });
+
+    function resetAdditionalImagesInput() {
+        editAdditionalImagesInput.value = '';
+    }
+
+    if (editProductImageInput) {
+        // Updates Edit Modal Image Display
+        editProductImageInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    editProductImagePreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    editProductForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const productId = document.getElementById('edit-product-id').value;
+
+        const fileInput = document.getElementById('edit-product-image');
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append('edit-product-image', fileInput.files[0]);
+        }
+
+        // Append additional images
+        editAdditionalImagesFiles.forEach(file => {
+            formData.append('editAdditionalImages', file);
+        });
+
+        fetch(`/edit-product/${productId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                fetchProducts();
+                editProductModal.style.display = 'none';
+            } else {
+                alert('Error updating product: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating the product.');
         });
     });
 
-    const editAdditionalImagesPreview = document.getElementById('edit-additional-images-container');
+    // Additional existing code...
 
-    // Attach the input event listener to adjust the height as the user types
-    descriptionTextArea?.addEventListener('input', function () {
-        autoExpandTextarea(descriptionTextArea);
-    });
-
-    detailsTextArea?.addEventListener('input', function () {
-        autoExpandTextarea(detailsTextArea);
-    });
-
-    // Initial call to adjust the height when the page loads
-    autoExpandTextarea(descriptionTextArea);
-    autoExpandTextarea(detailsTextArea);
-
-    // Function to automatically adjust the height of the textArea
-    function autoExpandTextarea(element) {
-        element.style.height = 'auto';
-        element.style.height = (element.scrollHeight) + 'px';
-    }
-
-    // Fetch categories
     function fetchCategories() {
         fetch('/api/categories')
             .then(response => response.json())
@@ -101,11 +348,59 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('Fetched categories:', categories);
                 updateCategoryDropdown(categories);
                 if (categoryList) updateShopPageCategories(categories);
+                updateFilterDropdown(filterCategory, categories);
             })
             .catch(error => {
                 console.error('Error fetching categories:', error);
             });
     }
+
+
+    function fetchCollections() {
+        fetch('/api/collections')
+            .then(response => response.json())
+            .then(data => {
+                if (!Array.isArray(data)) {
+                    throw new Error(data.message || 'Invalid response format');
+                }
+                console.log('Fetched collections:', data);
+                updateCollectionList(data);
+                updateFilterDropdown(filterCollection, data);
+            })
+            .catch(error => {
+                console.error('Error fetching collections:', error.message);
+            });
+    }
+
+
+    function updateCollectionList(collections) {
+        const collectionList = document.querySelector('.collection-list');
+        collectionList.innerHTML = ''; // Clear existing collections
+
+        collections.forEach(collection => {
+            const collectionDiv = document.createElement('div');
+            collectionDiv.className = 'collection-item';
+            collectionDiv.dataset.collectionId = collection._id;
+            collectionDiv.innerHTML = `
+                <img src="${collection.coverPhoto}" alt="${collection.name}">
+                <div>
+                    <h2>${collection.name}</h2>
+                    <p class="description">${collection.description}</p>
+                </div>
+                <button type="button" class="delete-button" data-id="${collection._id}"><i class="fas fa-trash"></i></button>
+            `;
+            collectionDiv.style.setProperty('--background-color', `#${collection.backgroundColor}`);
+            collectionDiv.style.setProperty('--text-color', `#${collection.textColor}`);
+            collectionList.appendChild(collectionDiv);
+
+            const deleteButton = collectionDiv.querySelector('.delete-button');
+            deleteButton.addEventListener('click', () => {
+                deleteCollection(collection._id, collectionDiv);
+            });
+        });
+    }
+    
+    fetchCollections();
 
     function updateCategoryDropdown(categories) {
         if (!dropdownList) return; // Check if the dropdownList exists
@@ -137,6 +432,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             item.appendChild(deleteButton);
             dropdownList.appendChild(item);
+        });
+    }
+
+    function updateFilterDropdown(dropdown, items) {
+        dropdown.innerHTML = '<option value="">All</option>';
+        items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.name;
+            option.textContent = item.name;
+            dropdown.appendChild(option);
         });
     }
 
@@ -192,8 +497,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    function fetchProducts(category = '') {
-        fetch(`/api/products${category ? `?category=${category}` : ''}`)
+    function fetchProducts(category = '', collection = '', search = '') {
+        let url = `/api/products?`;
+        if (category) url += `category=${category}&`;
+        if (collection) url += `collection=${collection}&`;
+        if (search) url += `search=${search}&`;
+    
+        fetch(url)
             .then(response => response.json())
             .then(products => {
                 const productList = document.querySelector('.product-list');
@@ -201,46 +511,65 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error('Product list element not found.');
                     return;
                 }
-                productList.innerHTML = ''; // Clear existing content
-
-                products.forEach(product => {
-                    const productDiv = document.createElement('div');
-                    productDiv.className = 'product-item';
-                    productDiv.dataset.productId = product._id;
-                    productDiv.innerHTML = `
-                    <button type="button" class="edit-product" data-id="${product._id}">
-                    <i class="fas fa-edit"></i>
-                    </button>
-                        <img src="${product.imageUrl}" alt="${product.name}">
-                        <h2>${product.name}</h2>
-                        <p class="indented"><strong>Price:</strong> $${product.price}</p>
-                        <p class="indented"><strong>Category:</strong> ${product.category}</p>
-                        <p class="indented"><strong>Stock:</strong> ${product.stockQuantity ?? 'N/A'}</p> <!-- Added stock quantity -->
-                        <form method="POST" action="/delete-product">
-                            <input type="hidden" name="productId" value="${product._id}">
-                            <button type="button" class="delete-button" data-id="${product._id}"><i class="fas fa-trash"></i></button>
-                        </form>
-                    `;
-                    productList.appendChild(productDiv);
-                });
-
-                const deleteButtons = document.querySelectorAll('.delete-button');
-                deleteButtons.forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        productToDelete = button.dataset.id;
-                        deleteProductModal.style.display = 'block';
+    
+                const existingProductItems = Array.from(productList.children);
+    
+                // Mark all existing product items for hiding
+                existingProductItems.forEach(item => item.classList.add('hide'));
+    
+                setTimeout(() => {
+                    // Clear existing content after the hiding animation completes
+                    productList.innerHTML = '';
+    
+                    if (products.length === 0) {
+                        productList.innerHTML = '<p>No products found.</p>'; // Display a message when no products are found
+                        return;
+                    }
+    
+                    products.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className = 'product-item';
+                        productDiv.dataset.productId = product._id;
+                        productDiv.innerHTML = `
+                        <button type="button" class="edit-product" data-id="${product._id}">
+                        <i class="fas fa-edit"></i>
+                        </button>
+                            <img src="${product.imageUrl}" alt="${product.name}">
+                            <h2>${product.name}</h2>
+                            <p class="indented"><strong>Price:</strong> $${product.price}</p>
+                            <p class="indented"><strong>Category:</strong> ${product.category}</p>
+                            <p class="indented"><strong>Collection:</strong> ${product.collectionName}</p>
+                            <p class="indented"><strong>Stock:</strong> ${product.stockQuantity ?? 'N/A'}</p> <!-- Added stock quantity -->
+                            <form method="POST" action="/delete-product">
+                                <input type="hidden" name="productId" value="${product._id}">
+                                <button type="button" class="delete-button" data-id="${product._id}"><i class="fas fa-trash"></i></button>
+                            </form>
+                        `;
+    
+                        productList.appendChild(productDiv);
+    
+                        // Trigger the transition
+                        setTimeout(() => productDiv.classList.remove('hide'), 10);
                     });
-                });
-                // Attach edit event listener
-                const editButtons = document.querySelectorAll('.edit-product');
-                editButtons.forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const productId = button.dataset.id;
-                        openEditModal(productId);
+    
+                    const deleteButtons = document.querySelectorAll('.delete-button');
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            productToDelete = button.dataset.id;
+                            deleteProductModal.style.display = 'block';
+                        });
                     });
-                });
+                    // Attach edit event listener
+                    const editButtons = document.querySelectorAll('.edit-product');
+                    editButtons.forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const productId = button.dataset.id;
+                            openEditModal(productId);
+                        });
+                    });
+                }, 50); // Match the transition duration
             })
             .catch(error => {
                 console.error('Error fetching products:', error);
@@ -269,7 +598,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     fetchCategories();
+    fetchCollections();
     fetchProducts();
+
 
     // Handle category deletion when confirm button is clicked
     confirmDeleteBtn?.addEventListener('click', () => {
@@ -377,6 +708,91 @@ document.addEventListener('DOMContentLoaded', function () {
             errorMessagesDiv.innerHTML = '';
         }
     }
+    
+    
+
+
+    // Add a collection to the collections page after the owner clicks the "add collection" button
+    addCollectionForm.addEventListener('submit', function(e) { 
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/add-collection', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(text => {
+            console.log('REsponse text:', text);
+            return JSON.parse(text);
+        })
+            .then(data => {
+                if (data.success) {
+                    this.reset();
+                    backgroundColorPicker.value = '#000000'; // Reset color picker
+                    backgroundColorInput.value = ''; // Reset the hidden color input
+
+                    textColorPicker.value = '#000000';
+                    textColorInput.value = '';
+                
+
+                    const collection = data.collection;
+                    const collectionDiv = document.createElement('div');
+                    collectionDiv.className = 'collection-item';
+                    collectionDiv.dataset.collectionId = collection._id;
+                    collectionDiv.innerHTML = `
+                        <img src="${collection.coverPhoto}" alt="${collection.name}">
+                        <div>
+                            <h2>${collection.name}</h2>
+                            <p class="description">${collection.description}</p>
+                        </div>
+                        <button type="button" class="delete-button" data-id="${collection._id}"><i class="fas fa-trash"></i></button>
+                    `;
+                    collectionDiv.style.setProperty('--text-color', '#${collection.textColor}');
+                    collectionDiv.style.setProperty('--background-color', `#${collection.backgroundColor}`);
+                    collectionList.appendChild(collectionDiv);
+
+                    const deleteButton = collectionDiv.querySelector('.delete-button');
+                    deleteButton.addEventListener('click', () => {
+                        deleteCollection(collection._id, collectionDiv);
+                });
+
+                } else {
+                    alert('Error adding collection: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred whle adding the collection.');
+            });
+        
+    });
+
+    // Delete collection in the owner dashboard
+    function deleteCollection(collectionId, collectionDiv) {
+        fetch('/delete-collection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ collectionId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                collectionDiv.remove();
+            } else {
+                alert('Error deleting collection: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the collection.');
+        });
+    }
+
+
 
     // Prevent Enter key from submitting the form and opening the modal
     const addProductForm = document.getElementById('add-product-form');
@@ -545,8 +961,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to display additional images as thumbnails
-    function displayThumbnails(images, container) {
+    function displayThumbnails(images, primaryImageUrl, container) {
         container.innerHTML = '';
+
+        // Display primary image
+        if (primaryImageUrl) {
+            const primaryImageDiv = document.createElement('div');
+            primaryImageDiv.classList.add('thumbnail');
+            primaryImageDiv.innerHTML = `
+                <img src="${primaryImageUrl}" alt="Primary Image">
+                <button class="delete-thumbnail" data-index="primary">&times;</button>
+            `;
+            container.appendChild(primaryImageDiv);
+        }
+
         images.forEach((imageUrl, index) => {
             const thumbnailDiv = document.createElement('div');
             thumbnailDiv.classList.add('thumbnail');
@@ -571,7 +999,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 editProductPrice.value = product.price;
                 editProductStock.value = product.stockQuantity;
                 editProductImagePreview.src = product.imageUrl; // default image if no image exists
-                displayThumbnails(product.additionalImages, editAdditionalImagesPreview);
+                displayThumbnails(product.additionalImages, null, editAdditionalImagesPreview);
                 editProductModal.style.display = 'block';
                 resetAdditionalImagesInput();
             })
@@ -583,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('edit-additional-images-container').addEventListener('click', function (e) {
         if (e.target.classList.contains('delete-thumbnail')) {
             const index = e.target.dataset.index;
-            const productId = editProductId.value;
+            const productId = document.getElementById('edit-product-id').value;
             const imageUrl = e.target.previousElementSibling.src.split('/uploads/')[1]; // Extract relative path
 
             fetch('/delete-image', {
@@ -669,7 +1097,7 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
 
         const formData = new FormData(this);
-        const productId = editProductId.value;
+        const productId = document.getElementById('edit-product-id').value;
 
         const fileInput = document.getElementById('edit-product-image');
         if (fileInput && fileInput.files.length > 0) {
@@ -700,49 +1128,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('An error occurred while updating the product.');
             });
     });
-
-    function resetAdditionalImagesInput() {
-        editAdditionalImagesInput.value = '';
-    }
-    // Event listener to delete thumbnails from edit modal
-    editAdditionalImagesPreview.addEventListener('click', function (e) {
-        if (e.target.classList.contains('delete-thumbnail')) {
-            const index = e.target.dataset.index;
-            const productId = document.getElementById('edit-product-id').value;
-            const imageUrl = e.target.previousElementSibling.src.split('/uploads/')[1]; // Extract relative path
-
-            fetch(`/delete-image`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productId, imageUrl: `/uploads/${imageUrl}` }) // Send relative path
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    e.target.parentElement.remove(); // Remove the image thumbnail from the DOM
-
-                    // Update the product's additional images in the frontend
-                    const productItem = document.querySelector(`.product-item[data-product-id="${productId}"]`);
-                    if (productItem) {
-                        const additionalImagesContainer = productItem.querySelector('.additional-images-container');
-                        if (additionalImagesContainer) {
-                            const imageElement = additionalImagesContainer.querySelector(`img[src="${data.imageUrl}"]`);
-                            if (imageElement) {
-                                imageElement.parentElement.remove(); // Remove image from product tile
-                            }
-                        }
-                    }
-                } else {
-                    console.error('Error deleting image:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-    });
+    
 
     if (closeEditProductModalBtn) {
         // Close edit modal when the close button is clicked
@@ -759,5 +1145,31 @@ document.addEventListener('DOMContentLoaded', function () {
             resetAdditionalImagesInput();
         }
     });
+
+   // Event listeners to trigger instant updates
+    searchInput.addEventListener('input', () => {
+        const search = searchInput.value;
+        const category = filterCategory.value;
+        const collection = filterCollection.value;
+        fetchProducts(category, collection, search);
+    });
+
+    filterCategory.addEventListener('change', () => {
+        const category = filterCategory.value;
+        const collection = filterCollection.value;
+        const search = searchInput.value;
+        fetchProducts(category, collection, search);
+    });
+
+    filterCollection.addEventListener('change', () => {
+        const collection = filterCollection.value;
+        const category = filterCategory.value;
+        const search = searchInput.value;
+        fetchProducts(category, collection, search);
+    });
+
+
+    
+
+
 });
- 
