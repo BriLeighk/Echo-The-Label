@@ -6,6 +6,7 @@
     <title>Owner Dashboard</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
 </head>
 <body>
     <%- include('partials/header') %>
@@ -32,26 +33,35 @@
                         <!-- Add Collection Section -->
                         <div class="add-collection-section">
                             <h2 id="add-collection-title">Add Collection</h2>
-
+                
                             <!-- Collection Preview Section -->
                             <div class="collection-preview-section">
-                                <div id="collection-preview" class="collection-item" style="background-color: #ffffff; color: #000000;">
-                                    <img id="preview-cover-photo" src="" alt="Cover Photo" style="display: none;">
+                                <div id="collection-preview" class="collection-item left" style="background-color: #ffffff; color: #000000;">
+                                    <img id="preview-cover-photo" src="/images/placeholder.jpg" alt="Cover Photo">
                                     <div>
                                         <h2 id="preview-name">Collection Name</h2>
                                         <p id="preview-description" class="description">Description</p>
                                     </div>
                                 </div>
                             </div>
-
+                
                             <form id="add-collection-form" method="POST" action="/add-collection" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label for="imagePosition">Image Position</label>
+                                    <div class="switch">
+                                        <input type="checkbox" id="imagePosition" name="imagePosition">
+                                        <span class="slider"></span>
+                                        <span class="label-left">Left</span>
+                                        <span class="label-right">Right</span>
+                                    </div>
+                                </div>
                                 <div class="form-group">
                                     <label for="collection-name">Collection Name</label>
                                     <input type="text" id="collection-name" name="name" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <input type="text" id="description" name="description" required>
+                                    <input type="text" id="description" name="description">
                                 </div>
                                 <div class="form-group">
                                     <label for="coverPhoto">Cover Photo</label>
@@ -60,13 +70,14 @@
                                 <div class="form-group">
                                     <label for="textColor">Text Color</label>
                                     <input type="color" id="textColorPicker">
-                                    <input type="text" id="textColor" name="textColor" placeholder="e.g. 000000" required>
+                                    <input type="text" id="textColor" name="textColor" placeholder="e.g. 000000">
                                 </div>
                                 <div class="form-group">
                                     <label for="backgroundColor">Background Color</label>
                                     <input type="color" id="backgroundColorPicker">
-                                    <input type="text" id="backgroundColor" name="backgroundColor" placeholder="e.g. FFFFFF" required>
+                                    <input type="text" id="backgroundColor" name="backgroundColor" placeholder="e.g. FFFFFF">
                                 </div>
+                                
                                 <button type="submit">Add Collection</button>
                             </form>
                         </div>

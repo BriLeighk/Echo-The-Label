@@ -1,4 +1,12 @@
 require('dotenv').config();
+console.log(process.env);
+console.log("AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID);
+console.log("AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY); // Should log the actual secret access key
+console.log("AWS_REGION:", process.env.AWS_REGION);
+console.log("AWS_BUCKET_NAME:", process.env.AWS_BUCKET_NAME);
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -6,35 +14,43 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const multer = require('multer');
-
-const User = require('./models/User');
-const Collection = require('./models/Collection');
-const Product = require('./models/Product');
-const Category = require('./models/Category');
-const Order = require('./models/Order');
-const CartItem = require('./models/CartItem');
-
 const fs = require('fs');
 const path = require('path');
-
 const app = express();
+
+const { User, Collection, Product, Category, Order, CartItem } = require('./models');
+
 const PORT = process.env.PORT || 3000;
 
-// Database connection
+// Connect to MongoDB database
 mongoose.connect(process.env.MONGO_URL, {});
 
+// Verify that environment variables are loaded
+console.log("AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID);
+console.log("AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY);
+console.log("AWS_REGION:", process.env.AWS_REGION);
 
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/');
+// Access keys for connecting to image cloud storage (AWS)
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
 });
-const upload = multer({ storage: storage });
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.AWS_BUCKET_NAME,
+    metadata: (req, file, cb) => {
+      cb(null, { fieldName: file.fieldname });
+  },
+    key: (req, file, cb) => {
+      cb(null, Date.now().toString() + '-' + file.originalname);
+    },
+  }),
+});
 
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -42,9 +58,13 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/fonts', express.static(path.join(__dirname, 'public/fonts')));
 
 app.use(
   session({
@@ -56,7 +76,7 @@ app.use(
   })
 );
 
-
+// Authentication checking
 const checkAuth = (req, res, next) => {
   console.log('Session data:', req.session);
   if (req.session.userId) {
@@ -66,13 +86,7 @@ const checkAuth = (req, res, next) => {
   }
 };
 
-app.use('/css', express.static(path.join(__dirname, 'public/css')));
-app.use('/js', express.static(path.join(__dirname, 'public/js')));
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
-app.use('/fonts', express.static(path.join(__dirname, 'public/fonts')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
-
+// Routes for rendering pages and handling authentication
 app.get('/', (req, res) => {
   res.render('index', { title: 'Start' });
 });
@@ -94,10 +108,31 @@ app.get('/api/check-login', (req, res) => {
   }
 });
 
+app.get('/partials/header', (req, res) => {
+  res.render('partials/header');
+});
 
+app.get('/dashboard', checkAuth, (req, res) => {
+  const role = req.session.role;
+  if (role === 'owner') {
+    res.render('owner-dashboard');
+  } else {
+    res.render('dashboard');
+  }
+});
 
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Failed to destroy session during logout:', err);
+      return res.status(500).json({ success: false, message: 'Failed to log out' });
+    }
+    res.clearCookie('connect.sid', { path: '/' });
+    res.json({ success: true, redirectUrl: '/home' });
+  });
+});
 
-//login modal functionality ///////////////////////////////////////////////////////////
+// Login and account creation
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ email: username });
@@ -111,12 +146,10 @@ app.post('/login', async (req, res) => {
   } else {
     req.session.userId = user._id;
     req.session.role = user.role;
-    res.json({ success: true, redirectUrl: '/dashboard' }); //maybe change to /home
+    res.json({ success: true, redirectUrl: '/dashboard' });
   }
 });
 
-
-//create account modal functionality ////////////////////////////////////////////////////
 app.post('/create-account', async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -131,53 +164,33 @@ app.post('/create-account', async (req, res) => {
     await newUser.save();
     req.session.userId = newUser._id;
     req.session.role = newUser.role;
-    res.json({ success: true, redirectUrl: '/login' }); //redirect user to login page
+    res.json({ success: true, redirectUrl: '/login' });
   } catch (error) {
     res.json({ success: false, message: 'Account already exists' });
   }
 });
 
-
-app.get('/dashboard', checkAuth, (req, res) => {
-  const role = req.session.role;
-  if (role === 'owner') {
-    res.render('owner-dashboard');
-  } else {
-    res.render('dashboard');
-  }
-});
-
-
-app.get('/partials/header', (req, res) => {
-  res.render('partials/header');
-});
-
-
-
-//Backend Route for adding a collection ////////////////////////////////////////////////
+// CRUD operations on collections
 app.post('/add-collection', checkAuth, upload.single('coverPhoto'), async (req, res) => {
-  const { name, description, textColor, backgroundColor } = req.body;
-  const coverPhoto = req.file ? `/uploads/${req.file.filename}` : '';
+  const { name, description, textColor, backgroundColor, imagePosition } = req.body;
+  const coverPhoto = req.file.location; // S3 URL
 
   try {
-    // Check if a collection with the same name already exists
     const existingCollection = await Collection.findOne({ name });
     if (existingCollection) {
       return res.json({ success: false, message: 'A collection with this name already exists.' });
     }
 
-    const collection = new Collection({ name, description, coverPhoto, textColor, backgroundColor });
+    const collection = new Collection({ name, description, coverPhoto, textColor, backgroundColor, imagePosition });
     await collection.save();
     console.log('Collection added successfully');
     res.json({ success: true, collection });
   } catch (error) {
-    console.error('Error adding collection:', error);
+    console.error('Error adding collection:', error.message);
     res.json({ success: false, message: 'Error adding collection' });
   }
 });
 
-
-//Backend Route to handle collection deletion /////////////////////////////////////////
 app.post('/delete-collection', checkAuth, async (req, res) => {
   const { collectionId } = req.body;
   try {
@@ -186,14 +199,13 @@ app.post('/delete-collection', checkAuth, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Collection not found' });
     }
 
-    // remove the cover photo from the file system
     if (collection.coverPhoto) {
-      const coverPhotoPath = path.join(__dirname, 'public', collection.coverPhoto);
-      fs.unlink(coverPhotoPath, (err) => {
-        if (err) {
-          console.error('Error deleting cover photo:', err);
-        }
-      });
+      const coverPhotoKey = collection.coverPhoto.split('/').pop();
+      const params = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: coverPhotoKey
+      };
+      await s3.send(new DeleteObjectCommand(params));
     }
 
     res.json({ success: true });
@@ -203,11 +215,11 @@ app.post('/delete-collection', checkAuth, async (req, res) => {
   }
 });
 
-//Backend Route for adding a product //////////////////////////////////////////////////
+// CRUD operations on products
 app.post('/add-product', checkAuth, upload.fields([{ name: 'imageUrl', maxCount: 1 }, { name: 'additionalImages', maxCount: 10 }]), async (req, res) => {
   const { name, description, details, price, category, collectionName, inStock } = req.body;
-  const imageUrl = req.files['imageUrl'] ? `/uploads/${req.files['imageUrl'][0].filename}` : '';
-  const additionalImages = req.files['additionalImages'] ? req.files['additionalImages'].map(file => `/uploads/${file.filename}`) : [];
+  const imageUrl = req.files['imageUrl'] ? req.files['imageUrl'][0].location : '';
+  const additionalImages = req.files['additionalImages'] ? req.files['additionalImages'].map(file => file.location) : [];
 
   let finalCategory = category;
 
@@ -226,7 +238,6 @@ app.post('/add-product', checkAuth, upload.fields([{ name: 'imageUrl', maxCount:
     await product.save();
     const updatedCategories = await Category.find();
 
-    console.log('Product added successfully. Returning updated categories:', updatedCategories);
     res.json({ success: true, product, categories: updatedCategories });
   } catch (error) {
     console.error('Error adding product:', error);
@@ -234,206 +245,29 @@ app.post('/add-product', checkAuth, upload.fields([{ name: 'imageUrl', maxCount:
   }
 });
 
-app.post('/delete-category', checkAuth, async (req, res) => {
-  const { categoryName } = req.body;
+app.post('/delete-image', async (req, res) => {
+  const { imageUrl } = req.body;
+  const imageKey = imageUrl.split('/').pop();
+
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: imageKey
+  };
+
   try {
-      // Find and delete the category
-      const deletedCategory = await Category.findOneAndDelete({ name: categoryName });
-
-      // If the category is not found, return an error
-      if (!deletedCategory) {
-          return res.status(404).json({ success: false, message: 'Category not found' });
-      }
-
-      // Remove the category from all products
-      await Product.updateMany({ category: categoryName }, { $unset: { category: '' } });
-
-      // Get updated categories
-      const categories = await Category.find();
-
-      res.json({ success: true, categories });
+    await s3.send(new DeleteObjectCommand(params));
+    res.send('Image deleted');
   } catch (error) {
-      console.error('Error deleting category:', error);
-      res.status(500).json({ success: false, message: 'Error deleting category' });
-  }
-});
-
-app.post('/delete-image', checkAuth, async (req, res) => {
-  const { productId, imageUrl } = req.body;
-  
-  try {
-      const product = await Product.findById(productId);
-      if (!product) {
-          return res.status(404).json({ success: false, message: 'Product not found' });
-      }
-
-      // Remove the image URL from the product's additionalImages array
-      const updatedImages = product.additionalImages.filter(img => img !== imageUrl);
-      product.additionalImages = updatedImages;
-      await product.save();
-
-      // Delete the image file from the filesystem
-      const imagePath = path.join(__dirname, 'public', imageUrl);
-      fs.unlink(imagePath, (err) => {
-          if (err) {
-              console.error('Error deleting image file:', err);
-              return res.status(500).json({ success: false, message: 'Error deleting image file' });
-          }
-          res.json({ success: true, imageUrl });
-      });
-  } catch (error) {
-      console.error('Error deleting image:', error);
-      res.status(500).json({ success: false, message: 'Error deleting image' });
-  }
-});
-
-
-
-app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Failed to destroy session during logout:', err);
-      return res.status(500).json({ success: false, message: 'Failed to log out' });
-    }
-    res.clearCookie('connect.sid', { path: '/' });
-    res.json({ success: true, redirectUrl: '/home' });
-  });
-});
-
-
-
-// Shop Page ///////////////////////////////////////////////////////////////
-app.get('/shop', async (req, res) => {
-  try {
-    const products = await Product.find(); //maybe remove exec();
-    const categories = await Category.find(); // Fetch categories
-    res.render('shop', { products, categories });
-  } catch (error) {
-    console.error('Error fetching shop:', error);
-    res.render('error', { message: 'Error fetching shop' });
-  }
-});
-
-
-app.get('/api/collections', checkAuth, async (req, res) => {
-  try {
-    const collections = await Collection.find();
-    res.json(collections);
-  } catch (error) {
-    console.error('Error fetching collections:', error);
-    res.status(500).json({ success: false, message: 'Error fetching collections' });
-  }
-});
-
-app.get('/collections', checkAuth, async (req, res) => {
-  try {
-    const collections = await Collection.find();
-    res.render('collections', { collections });
-  } catch (error) {
-    console.error('Error fetching collections:', error);
-    res.status(500).send('Error fetching collections');
-  }
-});
-
-app.get('/api/products', async (req, res) => {
-  try {
-    const { category, collection, search } = req.query;
-    let query = {};
-
-    if (category && category !== 'all') {
-        query.category = category;
-    }
-
-    if (collection && collection !== 'all') {
-        query.collectionName = collection;
-    }
-
-    if (search) {
-        query.name = { $regex: search, $options: 'i' }; // Case-insensitive search
-    }
-
-    const products = await Product.find(query);
-    res.json(products);
-} catch (error) {
-    res.status(500).json({ message: 'Error fetching products' });
-}
-});
-
-
-// Delete product route (in Manage Products Tab - Owner Dashboard)
-app.post('/delete-product', checkAuth, async (req, res) => {
-  const { productId } = req.body;
-  try {
-    const product = await Product.findById(productId);
-    if (product) {
-      const imagePaths = [
-        path.join(__dirname, 'public', product.imageUrl),
-        ...product.additionalImages.map(img =>path.join(__dirname, 'public', img))
-      ];
-
-      imagePaths.forEach(imagePath => {
-        fs.unlink(imagePath, (err) => {
-          if (err) {
-            console.error('Error deleting image file:', err);
-          }
-        });
-      });
-
-          //Delete product from database
-          
-      await Product.deleteOne({ _id: productId });
-    res.json({ success: true });
-    } else {
-      res.status(404).json({ success: false, message: 'Product not found' });
-    }
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ success: false, message: 'Error deleting product' });
-  }
-});
-
-
-app.get('/owner-dashboard', checkAuth, async (req, res) => {
-  try {
-    const categories = await Category.find();
-    const collections = await Collection.find();
-    const products = await Product.find();
-    res.render('owner-dashboard', { categories, collections, products });
-  } catch (error) {
-    console.error('Error fetching collections and products:', error);
-    res.render('error', { message: 'Error fetching data for owner dashboard' });
-  }
-});
-
-app.get('/api/categories', async (req, res) => {
-  try {
-    const categories = await Category.find();
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching categories' });
-  }
-});
-
-
-// Define the route to get a product by ID
-app.get('/api/product/:id', async (req, res) => {
-  const productId = req.params.id;
-  try {
-      const product = await Product.findById(productId);
-      if (!product) {
-          return res.status(404).json({ success: false, message: 'Product not found' });
-      }
-      res.json(product);
-  } catch (err) {
-      res.status(500).json({ success: false, message: 'Error fetching product' });
+    console.error('Error deleting image:', error);
+    res.status(500).send('Error deleting image');
   }
 });
 
 app.post('/edit-product/:id', checkAuth, upload.fields([{ name: 'edit-product-image', maxCount: 1 }, { name: 'editAdditionalImages', maxCount: 10 }]), async (req, res) => {
   const productId = req.params.id;
   const { 'edit-product-title': name, 'edit-product-description': description, 'edit-product-details': details, 'edit-product-price': price, 'edit-product-stock': stockQuantity } = req.body;
-  const imageUrl = req.files['edit-product-image'] ? `/uploads/${req.files['edit-product-image'][0].filename}` : '';
-  const additionalImages = req.files['editAdditionalImages'] ? req.files['editAdditionalImages'].map(file => `/uploads/${file.filename}`) : [];
+  const imageUrl = req.files['edit-product-image'] ? req.files['edit-product-image'][0].location : '';
+  const additionalImages = req.files['editAdditionalImages'] ? req.files['editAdditionalImages'].map(file => file.location) : [];
 
   console.log('Received edit request for product:', productId);
   console.log('Update data:', { name, description, details, price, stockQuantity, imageUrl });
@@ -445,14 +279,12 @@ app.post('/edit-product/:id', checkAuth, upload.fields([{ name: 'edit-product-im
     if (imageUrl) {
       const product = await Product.findById(productId);
       if (product && product.imageUrl) {
-        const oldImagePath = path.join(__dirname, 'public', product.imageUrl);
-        fs.unlink(oldImagePath, (err) => {
-          if (err) {
-            console.error('Error deleting old image:', err);
-          } else {
-            console.log('Old image deleted:', oldImagePath);
-          }
-        });
+        const oldImageKey = product.imageUrl.split('/').pop();
+        const params = {
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: oldImageKey
+        };
+        await s3.send(new DeleteObjectCommand(params));
       }
       updateData.imageUrl = imageUrl;
     }
@@ -470,13 +302,153 @@ app.post('/edit-product/:id', checkAuth, upload.fields([{ name: 'edit-product-im
   }
 });
 
-// Serve favicon.ico file
-app.get('/favicon.ico', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+// Category handling - CRUD operations
+app.post('/delete-category', checkAuth, async (req, res) => {
+  const { categoryName } = req.body;
+  try {
+    const deletedCategory = await Category.findOneAndDelete({ name: categoryName });
+
+    if (!deletedCategory) {
+      return res.status(404).json({ success: false, message: 'Category not found' });
+    }
+
+    await Product.updateMany({ category: categoryName }, { $unset: { category: '' } });
+
+    const categories = await Category.find();
+
+    res.json({ success: true, categories });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({ success: false, message: 'Error deleting category' });
+  }
 });
 
+// Path to render shop page with products and categories loaded up
+app.get('/shop', async (req, res) => {
+  try {
+    const products = await Product.find();
+    const categories = await Category.find();
+    res.render('shop', { products, categories });
+  } catch (error) {
+    console.error('Error fetching shop:', error);
+    res.render('error', { message: 'Error fetching shop' });
+  }
+});
 
+// Path to fetch collections (for collections list)
+app.get('/api/collections', checkAuth, async (req, res) => {
+  try {
+    const collections = await Collection.find();
+    res.json(collections);
+  } catch (error) {
+    console.error('Error fetching collections:', error);
+    res.status(500).json({ success: false, message: 'Error fetching collections' });
+  }
+});
 
+// Path to render collections page with collections loaded
+app.get('/collections', checkAuth, async (req, res) => {
+  try {
+    const collections = await Collection.find();
+    res.render('collections', { collections });
+  } catch (error) {
+    console.error('Error fetching collections:', error);
+    res.status(500).send('Error fetching collections');
+  }
+});
+
+// Path to fetch products and handle search and filter functionality 
+app.get('/api/products', async (req, res) => {
+  try {
+    const { category, collection, search } = req.query;
+    let query = {};
+
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+    if (collection && collection !== 'all') {
+      query.collectionName = collection;
+    }
+    if (search) {
+      query.name = { $regex: search, $options: 'i' }; // Case-insensitive search
+    }
+
+    const products = await Product.find(query);
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching products' });
+  }
+});
+
+// Path to render the Owner Dashboard
+app.get('/owner-dashboard', checkAuth, async (req, res) => {
+  try {
+    const categories = await Category.find();
+    const collections = await Collection.find();
+    const products = await Product.find();
+    res.render('owner-dashboard', { categories, collections, products });
+  } catch (error) {
+    console.error('Error fetching collections and products:', error);
+    res.render('error', { message: 'Error fetching data for owner dashboard' });
+  }
+});
+
+// Path to fetch categories
+app.get('/api/categories', async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching categories' });
+  }
+});
+
+// Path to delete an image
+app.post('/delete-image', checkAuth, async (req, res) => {
+  const { productId, imageUrl } = req.body;
+  
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const updatedImages = product.additionalImages.filter(img => img !== imageUrl);
+    product.additionalImages = updatedImages;
+    await product.save();
+
+    const imageKey = imageUrl.split('/').pop();
+    const params = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: imageKey
+    };
+
+    await s3.send(new DeleteObjectCommand(params));
+    res.json({ success: true, imageUrl });
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    res.status(500).json({ success: false, message: 'Error deleting image' });
+  }
+});
+
+// Path to fetch a product by ID
+app.get('/api/product/:id', async (req, res) => {
+  const productId = req.params.id;
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching product' });
+  }
+});
+
+// Serve favicon.ico file
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

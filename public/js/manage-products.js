@@ -50,72 +50,56 @@ document.addEventListener('DOMContentLoaded', function () {
     const backgroundColorInput = document.getElementById('backgroundColor');
     const textColorPicker = document.getElementById('textColorPicker');
     const textColorInput = document.getElementById('textColor');
+    const imagePositionInput = document.getElementById('imagePosition');
 
     const previewName = document.getElementById('preview-name');
     const previewDescription = document.getElementById('preview-description');
     const previewCoverPhoto = document.getElementById('preview-cover-photo');
     const collectionPreview = document.getElementById('collection-preview');
 
-    console.log('Script loaded');
+    const defaultImageUrl = '/images/placeholder.jpg';
+
 
     // Add event listeners with logging
-    if (nameInput) {
-        console.log('Name input found:', nameInput);
-        nameInput.addEventListener('input', (e) => {
-            console.log('Name input event:', e.target.value);
-            updatePreview();
-        });
-    } else {
-        console.error('Name input not found');
-    }
-
-    descriptionInput.addEventListener('input', (e) => {
-        console.log('Description input event:', e.target.value);
+    nameInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    coverPhotoInput.addEventListener('change', updatePreview);
+    backgroundColorInput.addEventListener('input', updatePreview);
+    textColorInput.addEventListener('input', updatePreview);
+    imagePositionInput.addEventListener('change', updatePreview);
+    backgroundColorPicker.addEventListener('input', () => {
+        backgroundColorInput.value = backgroundColorPicker.value.substring(1);
         updatePreview();
     });
-    coverPhotoInput.addEventListener('change', (e) => {
-        console.log('Cover photo change event:', e.target.value);
+    textColorPicker.addEventListener('input', () => {
+        textColorInput.value = textColorPicker.value.substring(1);
         updatePreview();
     });
-    backgroundColorInput.addEventListener('input', (e) => {
-        console.log('Background color input event:', e.target.value);
-        updatePreview();
-    });
-    textColorInput.addEventListener('input', (e) => {
-        console.log('Text color input event:', e.target.value);
-        updatePreview();
-    });
+    textColorInput.addEventListener('input', updatePreview);
+    imagePositionInput.addEventListener('change', updatePreview);
 
     function updatePreview() {
         console.log('Updating preview...');
 
         const nameValue = nameInput.value;
-        console.log('Name input value:', nameValue);
         previewName.textContent = nameValue || 'Collection Name';
-        console.log('Preview name text:', previewName.textContent);
 
         const descriptionValue = descriptionInput.value;
-        console.log('Description input value:', descriptionValue);
-        previewDescription.textContent = descriptionValue || 'Description';
-        console.log('Preview description text:', previewDescription.textContent);
+        previewDescription.textContent = descriptionValue || '';
 
-        const backgroundColor = backgroundColorInput.value;
-        console.log('Background color value:', backgroundColor);
+        const backgroundColor = backgroundColorInput.value || backgroundColorPicker.value;
         if (backgroundColor) {
             collectionPreview.style.backgroundColor = `#${backgroundColor}`;
         } else {
             collectionPreview.style.backgroundColor = '#ffffff';
         }
-        console.log('Collection preview background color:', collectionPreview.style.backgroundColor);
 
-        const textColor = textColorInput.value;
-        console.log('Text color value:', textColor);
+        const textColor = textColorInput.value || textColorPicker.value;
         if (textColor) {
             collectionPreview.style.color = `#${textColor}`;
         } else {
             collectionPreview.style.color = '#000000';
         }
-        console.log('Collection preview text color:', collectionPreview.style.color);
 
         const file = coverPhotoInput.files[0];
         if (file) {
@@ -123,16 +107,33 @@ document.addEventListener('DOMContentLoaded', function () {
             reader.onload = function (e) {
                 previewCoverPhoto.src = e.target.result;
                 previewCoverPhoto.style.display = 'block';
-                console.log('Cover photo preview updated');
             };
             reader.readAsDataURL(file);
         } else {
-            previewCoverPhoto.style.display = 'none';
-            console.log('No cover photo selected');
+            previewCoverPhoto.src = defaultImageUrl;
+            previewCoverPhoto.style.display = 'block';
         }
+
+        // Update image position
+        const isLeftPosition = imagePositionInput.checked;
+        if (isLeftPosition) {
+            collectionPreview.classList.add('right');
+            collectionPreview.classList.remove('left');
+        } else {
+            collectionPreview.classList.add('left');
+            collectionPreview.classList.remove('right');
+        }
+        console.log('Collection preview image position:', isLeftPosition ? 'right' : 'left');
     }
 
     updatePreview(); // Initial preview update
+
+    // Click event to toggle the slider
+    document.querySelector('.slider').addEventListener('click', function () {
+        imagePositionInput.checked = !imagePositionInput.checked;
+        updatePreview();
+    });
+    
 
 
 
@@ -260,14 +261,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target.classList.contains('delete-thumbnail')) {
             const index = e.target.dataset.index;
             const productId = document.getElementById('edit-product-id').value;
-            const imageUrl = e.target.previousElementSibling.src.split('/uploads/')[1]; // Extract relative path
+            const imageUrl = e.target.previousElementSibling.src; // Uses full S3 URL
 
             fetch('/delete-image', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ productId, imageUrl: `/uploads/${imageUrl}` })
+                body: JSON.stringify({ productId, imageUrl })
             })
             .then(response => response.json())
             .then(data => {
@@ -275,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     e.target.parentElement.remove(); // Remove the image thumbnail from the DOM
 
                     // Update the product's additional images in the frontend
-                    editAdditionalImagesFiles = editAdditionalImagesFiles.filter(file => file.name !== imageUrl.split('/').pop());
+                    editAdditionalImagesFiles = editAdditionalImagesFiles.filter(file => file.name !== imageUrl);
                 } else {
                     console.error('Error deleting image:', data.message);
                 }
@@ -376,10 +377,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateCollectionList(collections) {
         const collectionList = document.querySelector('.collection-list');
         collectionList.innerHTML = ''; // Clear existing collections
-
+    
         collections.forEach(collection => {
             const collectionDiv = document.createElement('div');
-            collectionDiv.className = 'collection-item';
+            collectionDiv.className = `collection-item ${collection.imagePosition}`;
             collectionDiv.dataset.collectionId = collection._id;
             collectionDiv.innerHTML = `
                 <img src="${collection.coverPhoto}" alt="${collection.name}">
@@ -392,13 +393,14 @@ document.addEventListener('DOMContentLoaded', function () {
             collectionDiv.style.setProperty('--background-color', `#${collection.backgroundColor}`);
             collectionDiv.style.setProperty('--text-color', `#${collection.textColor}`);
             collectionList.appendChild(collectionDiv);
-
+    
             const deleteButton = collectionDiv.querySelector('.delete-button');
             deleteButton.addEventListener('click', () => {
                 deleteCollection(collection._id, collectionDiv);
             });
         });
     }
+    
     
     fetchCollections();
 
@@ -715,9 +717,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add a collection to the collections page after the owner clicks the "add collection" button
     addCollectionForm.addEventListener('submit', function(e) { 
         e.preventDefault();
-
+    
         const formData = new FormData(this);
-
+        formData.delete('imagePosition'); // Remove the default checkbox value
+        formData.append('imagePosition', imagePositionInput.checked ? 'right' : 'left');
+    
         fetch('/add-collection', {
             method: 'POST',
             body: formData
@@ -732,14 +736,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     this.reset();
                     backgroundColorPicker.value = '#000000'; // Reset color picker
                     backgroundColorInput.value = ''; // Reset the hidden color input
-
+    
                     textColorPicker.value = '#000000';
                     textColorInput.value = '';
                 
-
                     const collection = data.collection;
                     const collectionDiv = document.createElement('div');
-                    collectionDiv.className = 'collection-item';
+                    collectionDiv.className = `collection-item ${collection.imagePosition}`;
                     collectionDiv.dataset.collectionId = collection._id;
                     collectionDiv.innerHTML = `
                         <img src="${collection.coverPhoto}" alt="${collection.name}">
@@ -752,22 +755,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     collectionDiv.style.setProperty('--text-color', '#${collection.textColor}');
                     collectionDiv.style.setProperty('--background-color', `#${collection.backgroundColor}`);
                     collectionList.appendChild(collectionDiv);
-
+    
                     const deleteButton = collectionDiv.querySelector('.delete-button');
                     deleteButton.addEventListener('click', () => {
                         deleteCollection(collection._id, collectionDiv);
-                });
-
+                    });
+    
                 } else {
                     alert('Error adding collection: ' + data.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred whle adding the collection.');
+                alert('An error occurred while adding the collection.');
             });
         
     });
+    
 
     // Delete collection in the owner dashboard
     function deleteCollection(collectionId, collectionDiv) {
@@ -1012,14 +1016,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target.classList.contains('delete-thumbnail')) {
             const index = e.target.dataset.index;
             const productId = document.getElementById('edit-product-id').value;
-            const imageUrl = e.target.previousElementSibling.src.split('/uploads/')[1]; // Extract relative path
+            const imageUrl = e.target.previousElementSibling.src; // Use full S3 URL
 
             fetch('/delete-image', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ productId, imageUrl: `/uploads/${imageUrl}` })
+                body: JSON.stringify({ productId, imageUrl })
             })
             .then(response => response.json())
             .then(data => {

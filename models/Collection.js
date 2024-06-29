@@ -6,6 +6,7 @@ const collectionSchema = new mongoose.Schema({
   coverPhoto: String,
   textColor: String,
   backgroundColor: String,
+  imagePosition: { type: String, enum: ['left', 'right'], default: 'left' }
 });
 
 const Collection = mongoose.model('Collection', collectionSchema);

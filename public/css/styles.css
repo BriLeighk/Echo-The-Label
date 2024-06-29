@@ -475,7 +475,7 @@ header {
     left: 0;
     width: 100%;
     height: 80vh;
-    background-image: url('../images/hero-background-white.jpg'); /* que es esso? */
+    background-image: url('../images/high-res.jpg'); /* que es esso? */
     background-size: cover;
     background-position: center;
     display: flex;
@@ -842,18 +842,27 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover {
         /* Manage Products Section */
     .manage-products-container, .manage-collections-container {
         display: flex;
-        justify-content: space-between;
+        justify-content: space-evenly;
         flex-wrap: wrap;
         margin-right: 0rem;
         padding-right: 0rem;
+        gap: 5px;
     }
     
     .add-product-section, .add-collection-section {
-        flex: 1 1 30%;
+        width: 500px;
         box-sizing: border-box;
         text-align: center;
         padding-right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
         
+    }
+
+    #add-collection-form {
+        justify-content: center;
     }
 
     
@@ -867,10 +876,20 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover {
     }
     
     .product-list-section, .collection-list-section {
-        flex: 1 1 30%;
         box-sizing: border-box;
         justify-content: center;
+        width: 500px;
+        
+    }
 
+    .product-list-section {
+        flex: 1 1 30%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .collection-list-section {
+        align-items: center;
     }
 
     .category-list-section {
@@ -887,14 +906,25 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover {
         --product-height: auto; /* Default height */
     }
     
-    .product-list, .collection-list {
+    .product-list {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         text-align: center;
         justify-content: left;
         padding: 0;
-        padding-left: 1rem;
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+
+    .collection-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        text-align: center;
+        justify-content: center;
+        padding: 0;
+        padding-left: 0rem;
         padding-right: 0rem;
     }
     
@@ -1558,59 +1588,98 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover {
 .collection-item, .collection-page-item {
     display: flex;
     align-items: center;
-    border-radius: 8px;
+    border-radius: 2px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 20px;
+    position: relative;
+    overflow: hidden; /* Prevent content from overflowing */
     color: var(--text-color); /* CSS variables for dynamic styling of text */
     background-color: var(--background-color); /* CSS variables for dynamic styling of background color */
 }
 
 .collection-item {
+    width: 400px;
     height: 100px;
     padding: 15px;
+    transition: 1s ease; /* Smooth transition for order */
+    justify-content: space-evenly;
 }
+
 
 .collection-page-item {
-    height: 300px;
-    padding: 25px;
+    width: 900px;
+    height: 310px;
+    padding: 15px;
+    justify-content: space-evenly;
 }
 
-.collection-item img {
-    width: auto;
-    height: 100px;
+
+.collection-page-item img , .collection-item img {
     border-radius: 4px;
-    margin-right: 20px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.collection-item.right img, .collection-item.left img {
+    order: 1;
+    max-width: 80px;
+    max-height: 100px;
+    transition: 1s ease; /* Smooth transition for order */
 }
 
 .collection-page-item img {
-    width: auto;
-    height: 300px;
-    border-radius: 4px;
-    margin-right: 20px;
+    max-width: 260px;
+    max-height: 570px;
 }
 
-.collection-item h2, .collection-page-item h2 {
-    margin: 0 0 10px;
+/* fonts for collection page tiles and dashboard tiles */
+.collection-page-item h2 {
+    margin: 5px;
     font-size: 24px;
 }
 
-.collection-item p, .collection-page-item p{
-    margin: 0;
+.collection-page-item p{
+    margin: 5px;
     font-size: 16px;
 }
 
-.collection-page-item .description {
-    margin: 0;
+.collection-item h2 {
+    margin: 5px;
+    font-size: clamp(16px, 20px, 24px);
 }
 
-.collection-item button.delete-button {
-    padding-top: 75px; /* aligns delete button with bottom of container */
-    margin-left: auto;
-    color: rgb(184, 38, 38);
+.collection-item p {
+    margin: 5px;
+    font-size: clamp(10px, 16px, 20px);
+}
+
+
+.collection-item p, .collection-item h2 {
+    margin: 0;
+    overflow: hidden;
+    max-width: 100%;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.collection-item.left button.delete-button,
+.collection-item.right button.delete-button {
+    order: 3; /* Ensure delete button is always on the right */
     background-color: transparent;
     border: none;
-    font-size: 15px;
-    
+    color: #b82626;
+    font-size: 15px; /* makes trash can size smaller */
+    padding-top: 84px;   
+}
+
+.collection-item.left button.delete-button {
+    margin-left: 29px; 
+}
+
+.collection-item.right button.delete-button {
+    margin-left: 10px;
 }
 
 .collection-item button.delete-button:hover {
@@ -1625,25 +1694,19 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover {
     padding: 0;
 }
 
-.collections-container {
+.collections-container, .collection-list {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
 }
 
-.collection-list {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 800px;
+.collections-container {
+    padding: 20px;
 }
 
 .collections {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 800px;
 }
 
 .collection {
@@ -1657,31 +1720,141 @@ a:hover, .icon:hover, .btn:hover, #menu-btn:hover, .hero-content.btn:hover {
     background-color: var(--background-color); /* CSS variables for dynamic styling of background color */
 }
 
-.collection img {
-    width: 80px;
-    height: auto;
-    border-radius: 4px;
-    margin-right: 20px;
+
+
+.collection-item.right img {
+    order: 2;
+    margin-right: 0;
+    margin-left: 20px;
 }
 
-.collection h2 {
-    margin: 0 0 10px;
-    font-size: 24px;
+.collection-item.right, .collection-item.left {
+    justify-content: space-evenly;
 }
 
-.collection p {
-    margin: 0;
-    font-size: 16px;
+.collection-item.left img,
+.collection-item.right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* so image covers container without distortion */
+}
+.collection-item.left div,
+.collection-item.right div {
+    overflow: hidden;
 }
 
-.collection div {
-    flex: 1;
+
+
+.collection-item div {
+    order: 2;
+    transition: 1s ease; /* Smooth transition for order */
+    min-width: 278px;
+    max-width: 278px;
+}
+
+.collection-page-item div {
+    transition: 1s ease; /* Smooth transition for order */
+    width: 400px;
+}
+
+.collection-item.right div {
+    order: 1;
+}
+
+.collection-item.left img, .collection-page-item.left img {
+    order: 1;
+}
+
+.collection-item.right img, .collection-page-item.right img {
+    order: 2;
+}
+
+.collection-item.left div, .collection-page-item.left div {
+    order: 2;
+}
+
+.collection-item.right div, .collection-page-item.right div {
+    order: 1;
 }
 
 /* Collection Preview in Owner Dashboard /////////////////////////////////////////*/
-    .collection-preview-section {
-        margin-top: 20px;
-    }
+.collection-preview-section {
+    margin-top: 20px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 34px;
+    margin-left: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+    cursor: pointer; /* Add cursor pointer to indicate clickability */
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 1s ease;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(46px); /* Adjusted for better alignment */
+}
+
+.label-left, .label-right {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: white;
+    pointer-events: none; /* Prevent labels from being clickable */
+    transition: opacity .4s ease; /* Smooth transition for visibility */
+}
+
+.label-left {
+    left: 10px;
+}
+
+.label-right {
+    right: 10px;
+}
+
+input:checked ~ .label-right {
+    opacity: 0; /* Hide left label when checked */
+}
+
+input:not(:checked) ~ .label-left {
+    opacity: 0; /* Hide right label when not checked */
+}
+
+    
 
 /* Responsive Design /////////////////////////////////////////////////////////////*/
 @media (max-width: 600px) {

@@ -13,8 +13,8 @@
     <div class="collections-container">
         <div class="collection-list">
             <% collections.forEach(collection => { %>
-                <div class="collection-page-item" data-id="<%= collection._id %>" data-bgcolor="<%= collection.backgroundColor %>">
-                    <img src="<%= collection.coverPhoto %>" alt="<%= collection.name %>" >
+                <div class="collection-page-item <%= collection.imagePosition %>" data-id="<%= collection._id %>" data-bgcolor="<%= collection.backgroundColor %>">
+                    <img src="<%= collection.coverPhoto %>" alt="<%= collection.name %>">
                     <div>
                         <h2><%= collection.name %></h2>
                         <p class="description"><%= collection.description %></p>
@@ -23,6 +23,7 @@
             <% }) %>
         </div>
     </div>
+    
     <script src="/js/manage-products.js"></script>
     <script src="/js/header.js"></script>
     <script>
