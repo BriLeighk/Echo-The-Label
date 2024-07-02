@@ -1,21 +1,34 @@
 name: Deploy to AWS
-on: push
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
+
       - name: Install dependencies
         run: npm install
-      - name: Deploy to S3
+
+      - name: Deploy to AWS
         env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
         run: |
           # Your deployment script here
-          echo "Deploying to S3"
+          echo "Deploying to AWS"
